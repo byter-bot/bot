@@ -56,7 +56,8 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
         code_return = '<empty>'
         code_stdout = io.StringIO()
         env = {'_': self._last_eval_value, 'b': self.bot}
-        env.update(globals()|locals())
+        env.update(globals())
+        env.update(locals())
         try:
             exec_time = time.perf_counter()
             exec(code, env)
