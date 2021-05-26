@@ -1,4 +1,3 @@
-import asyncio
 import fcntl
 import os
 import signal
@@ -6,7 +5,6 @@ import time
 import traceback
 from pathlib import Path
 
-import discord
 from discord.ext import commands
 
 
@@ -18,7 +16,7 @@ class Debug(commands.Cog):
         fcntl.fcntl(exts_fd, fcntl.F_NOTIFY, fcntl.DN_MODIFY | fcntl.DN_CREATE)
         signal.signal(signal.SIGIO, self.handle_sig)
 
-    def handle_sig(self, sig, frm):
+    def handle_sig(self, *_):
         for ext in Path('exts').glob('*.py'):
             ext_name = str(ext)[:-3].replace('/', '.')
             time.sleep(0.1)

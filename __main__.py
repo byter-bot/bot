@@ -1,12 +1,9 @@
-import signal
-import aiohttp
 import json
-import os
-import sys
 import traceback
 from collections import namedtuple
 from pathlib import Path
 
+import aiohttp
 import discord
 from discord.ext import commands
 

@@ -6,7 +6,6 @@ import time
 
 import discord
 from discord.ext import commands
-import sys
 
 
 codeblock_wrapper = textwrap.TextWrapper(
@@ -18,7 +17,7 @@ codeblock_wrapper = textwrap.TextWrapper(
 def format_codeblock(text: str):
     text = str(text)
     if text == '':
-        return
+        return None
 
     formatted = codeblock_wrapper.fill(str(text))
     if len(formatted) > 1000:
@@ -87,7 +86,7 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
             stdout_formatted = format_codeblock(code_stdout.getvalue())
             embed = discord.Embed(
                 color=0x50fa50,
-                title=f":white_check_mark: Code evaluated",
+                title=":white_check_mark: Code evaluated",
                 description=f"{time.perf_counter()-exec_time:g}s :clock2:"
             )
             embed.add_field(
