@@ -22,7 +22,11 @@ CFG_DEFAULTS = {
 # values using their name as properties
 _cfg = CFG_DEFAULTS
 _cfg.update(json.load(open('config.json')))
+<<<<<<< HEAD
 CFG = namedtuple('Config', CFG_DEFAULTS)(**_cfg)
+=======
+CFG = namedtuple('Config', CFG_DEFAULTS)(_cfg)
+>>>>>>> 7bff698b96a9d6c0f683d706ae0c793eed58901f
 
 class ByterBot(commands.Bot):
     def __init__(self):
