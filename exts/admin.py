@@ -70,8 +70,8 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
             traceback_formatted = format_codeblock(traceback.format_exc(-1))
             embed = discord.Embed(
                 color=0xfa5050,
-                title=f":x: {exc!r}!",
-                description=f"{time.perf_counter()-exec_time:3g}s :clock2:"
+                title=f":x: error!",
+                description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
 
             embed.add_field(name='Traceback', value=traceback_formatted, inline=False)
@@ -90,7 +90,7 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
             embed = discord.Embed(
                 color=0x50fa50,
                 title=":white_check_mark: Code evaluated",
-                description=f"{time.perf_counter()-exec_time:g}s :clock2:"
+                description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
             embed.add_field(
                 name='Return', value=return_formatted, inline=False
