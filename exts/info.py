@@ -22,7 +22,7 @@ class Info(commands.Cog):
             else:
                 offset = datetime.timedelta(hours=int(re.findall(r'-?\d+', timezone)[0]))
 
-            if abs(offset.days) >= 1:
+            if -1 <= offset.days >= 1:
                 raise commands.BadArgument('Invalid offset (≥ 24 hrs)')
 
             dt = datetime.datetime.now(datetime.timezone(offset))
