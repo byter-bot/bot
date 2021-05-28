@@ -101,14 +101,20 @@ class Text(commands.Cog):
 
 
     @commands.command(aliases=['uc'])
-    async def unicodeinfo(self, ctx, char):
-        """Gives info about a unicode character"""
+    async def unicodeinfo(self, ctx, *, char):
+        """Gives info about a unicode character
+
+        Char can be a single character, an hex number, or the *full* character name"""
         if len(char) > 1:
             try:
                 char = chr(int(char.strip('uU+'), base=16))
 
             except ValueError:
-                raise commands.BadArgument('Invalid unicode point')
+                try:
+                    char = unicodedata.lookup(char)
+
+                except KeyError:
+                    raise commands.BadArgument('Invalid unicode point')
 
         try:
             category = unicodedata.category(char)
@@ -158,8 +164,22 @@ class Text(commands.Cog):
                 description=(
                     f'hex digest → `{hashed.hexdigest()}`\n'
                     f'raw digest → `{hashed.digest()}`\n'
-                    f'decoded → `{hashed.digest().decode(errors="replace")!r}`'
+                    f'decoded → `{hashed.digest().decode(errors="replace")}`'
                 )
+            )
+        )
+
+    @commands.command(aliases=['mono'])
+    async def fullwidth(self, ctx, *, text: str):
+        # Translate ascii -> fullwidth by adding 0xfee0, but use U+3000 for spaces
+        translation_table = dict(zip(range(0x21, 0x7e), range(0xff01, 0xff5e)))
+        translation_table.update({0x21: 0x3000})
+        fullwidth_text = text.translate(translation_table)
+        await ctx.send(
+            embed=discord.Embed(
+                color=0x5050fa,
+                title='Full-width text',
+                description=fullwidth_text
             )
         )
 
