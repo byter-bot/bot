@@ -10,13 +10,8 @@ from discord.ext import commands
 class Stats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.commands_hit = 0
         self.commands_completed = 0
         self.commands_errored = 0
-
-    @commands.Cog.listener()
-    async def on_command(self, *_):
-        self.commands_hit += 1
 
     @commands.Cog.listener()
     async def on_command_completion(self, *_):
@@ -47,9 +42,10 @@ class Stats(commands.Cog):
         embed.add_field(
             name='Usage',
             value=(
-                f'Commands hit: {self.commands_hit}\n'
                 f'Commands completed: {self.commands_completed}\n'
-                f'Commands errored: {self.commands_errored}'
+                f'Commands errored: {self.commands_errored}\n'
+                f'Total commands: {self.commands_completed + self.commands_errored}\n'
+                f'Servers: {len(self.bot.guilds)}'
             )
         )
 
