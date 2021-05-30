@@ -10,7 +10,7 @@ class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def qa(self, ctx, *, question):
         if not hasattr(self, 'qa_questions'):
             raise commands.CheckFailure("There isn't an qa session running")
@@ -18,7 +18,7 @@ class Utils(commands.Cog):
         self.qa_questions.append((ctx.author, question, ctx.message))
         await ctx.message.add_reaction('\N{white heavy check mark}')
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.check_any(commands.is_owner(), commands.has_any_role('Créu Chief', 'Créu Crew'))
     async def qastart(self, ctx):
         if hasattr(self, 'qa_questions'):
@@ -28,7 +28,7 @@ class Utils(commands.Cog):
         self.qa_questions_seen = []
         await ctx.message.add_reaction('\N{white heavy check mark}')
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.check_any(commands.is_owner(), commands.has_any_role('Créu Chief', 'Créu Crew'))
     async def qaend(self, ctx):
         if not hasattr(self, 'qa_questions'):
@@ -54,7 +54,7 @@ class Utils(commands.Cog):
         delattr(self, 'qa_questions')
         delattr(self, 'qa_questions_seen')
 
-    @commands.command(aliases=['qapick'])
+    @commands.command(aliases=['qapick'], hidden=True)
     @commands.check_any(
         commands.is_owner(),
         commands.has_any_role('Créu Chief', 'Créu Curator', 'Créu Captain')
