@@ -41,7 +41,7 @@ class ErrorHandler(commands.Cog):
         elif isinstance(error, commands.UserInputError):
             formatted_error = re.sub(
                 # Error Name ('error message') -> Error name: error message
-                r" \('(.*)'\)", r': \1',
+                r" \(['\"](.*)['\"]\)", r': \1',
                 # split PascalCase
                 re.sub(r'([A-Z][a-z]+)', r'\1 ', repr(error))
             ).capitalize().strip('.')
@@ -59,7 +59,7 @@ class ErrorHandler(commands.Cog):
                 embed=discord.Embed(
                     color=0xfa5050,
                     title=':x: Check failed!',
-                    description=f'{error.message}'
+                    description=f'{error}'
                 )
             )
 
