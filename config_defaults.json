@@ -1,0 +1,9 @@
+{
+    "prefix": [],
+    "reactions": {},
+    "intents": {
+        "guilds": true,
+        "guild_messages": true,
+        "guild_reactions": true
+    }
+}
