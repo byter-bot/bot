@@ -71,20 +71,26 @@ class ErrorHandler(commands.Cog):
             return
 
         else:
-            if isinstance(error, commands.CommandInvokeError):
-                await ctx.send(
-                    embed=discord.Embed(
-                        color=0xfa5050,
-                        title=":x: Uncaught error!",
-                        description=(
-                            "An uncaught error has occurred while processing your command:\n"
-                            f"`{error.original!r}`\n\n"
-                            "This has been automatically reported, feel free to open an issue on "
-                            "[my server](https://discord.gg/ZKHjRcy9bd) (or at my "
-                            "[github repo](https://github.com/dzshn/byter-rewrite/issues/new))"
-                        )
+            formatted_error = str(error)
+            if hasattr(error, 'original'):
+                formatted_error = repr(error.original)
+
+            if len(formatted_error) > 80:
+                formatted_error = formatted_error[:80] + '…'
+
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa5050,
+                    title=":x: Uncaught error!",
+                    description=(
+                        "An uncaught error has occurred while processing your command:\n"
+                        f"`{formatted_error}`\n\n"
+                        "This has been automatically reported, feel free to open an issue on "
+                        "[my server](https://discord.gg/ZKHjRcy9bd) (or at my "
+                        "[github repo](https://github.com/dzshn/byter-rewrite/issues/new))"
                     )
                 )
+            )
 
             dump_obj = {
                 "ctx": {
