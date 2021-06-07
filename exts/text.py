@@ -7,8 +7,11 @@ import time
 import typing
 import unicodedata
 
+import aiohttp
 import discord
+import PIL
 from discord.ext import commands
+from PIL import Image
 
 
 codeblock_wrapper = textwrap.TextWrapper(
@@ -100,7 +103,6 @@ class Text(commands.Cog):
             ),
             file=trunc
         )
-
 
     @commands.command(aliases=['uc'])
     async def unicodeinfo(self, ctx, *, char):
@@ -196,7 +198,19 @@ class Text(commands.Cog):
 
             text = (await ctx.fetch_message(ctx.message.reference.message_id)).content
 
-        match = re.search(pattern.strip('`'), text)
+        try:
+            match = re.search(pattern.strip('`'), text)
+
+        except re.error as exc:
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa5050,
+                    title='Regex error!',
+                    description=str(exc)
+                )
+            )
+            return
+
         if match:
             await ctx.send(
                 embed=discord.Embed(
@@ -214,7 +228,7 @@ class Text(commands.Cog):
                 embed=discord.Embed(
                     color=0xfa7050,
                     title='No matches!'
-                )
+                ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
             )
 
     @commands.command(aliases=['sre'])
@@ -250,6 +264,88 @@ class Text(commands.Cog):
                 )
             ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
         )
+
+    @commands.command(aliases=['img2text', 'asciiart'])
+    async def textimg(self, ctx, width: typing.Optional[int] = 48):
+        """Converts an image to text
+
+        · Image must be an attachment and under 10 mb
+        · Large images are sent through DMs"""
+        if not 1 <= width <= 320:
+            raise commands.BadArgument('width out of range (1 to 320)')
+
+        if not ctx.message.attachments:
+            raise commands.BadArgument('missing attachment')
+
+        if ctx.message.attachments[0].size > 1e7: # 10 mb
+            raise commands.BadArgument('file too large')
+
+        init_time = time.perf_counter()
+        try:
+            image = Image.open(io.BytesIO(await ctx.message.attachments[0].read()))
+            load_time = time.perf_counter()
+
+        except PIL.UnidentifiedImageError:
+            raise commands.BadArgument('invalid image')
+
+
+        if image.size[1]/(image.size[0]/width)//1.8 >= 320:
+            raise commands.UserInputError('file height is too high!')
+
+        # Make alpha bg black, resize image and convert to greyscale
+        image = Image.alpha_composite(
+            Image.new('RGBA', image.size, (0, 0, 0)),
+            image.convert(mode='RGBA')
+        )
+        image = image.resize((width, int((image.size[1]/(image.size[0]/width))//1.8)))
+        image = image.convert(mode='L')
+
+        # Iter through entire image and create the resulting text with unicode block elements
+        output = [
+            ''.join(
+                ' ░░▒▒▓▓█'[image.getpixel((x, y))//32]
+                for x in range(image.size[0])
+            )
+            for y in range(image.size[1])
+        ]
+
+        # Trim trailing blank lines
+        while output[0] == ' ' * width:
+            output = output[1:]
+
+        while output[-1] == ' ' * width:
+            output = output[:-1]
+
+        output = '\n'.join(output)
+        if len(output) < 1500 and max(image.size) < 70:
+            await ctx.send(
+                f'```{output}```'
+                f'`{image.size[0]}x{image.size[1]}`\n'
+                f'loaded in {(load_time-init_time)*1000:.0f}ms\n'
+                f'processed in {(time.perf_counter()-load_time)*1000:.0f}ms\n'
+            )
+
+        else:
+            if len(output) < 1900 and image.size[1] < 70:
+                await ctx.author.send(
+                    f"Here's your image!\n"
+                    f'```{output}```'
+                    f'`{image.size[0]}x{image.size[1]}`\n'
+                    f'loaded in {(time.perf_counter()-load_time)*1000}ms\n'
+                    f'processed in {(init_time-load_time)*1000}ms'
+                )
+
+            else:
+                await ctx.author.send(
+                    f"Here's your image!\n"
+                    f'`{image.size[0]}x{image.size[1]}`\n'
+                    f'loaded in {(time.perf_counter()-load_time)*1000}ms\n'
+                    f'processed in {(init_time-load_time)*1000}ms',
+                    file=discord.File(io.StringIO(output), 'image.txt')
+                )
+
+            await ctx.message.add_reaction('\N{white heavy check mark}')
+
 
 
 def setup(bot):

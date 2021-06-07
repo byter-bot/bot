@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 import io
+import json
 import textwrap
 import traceback
 import time
@@ -153,6 +154,10 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
 
         await ctx.send(embed=embed, files=get_files(stdout.decode(), stderr.decode()))
 
+    @commands.command()
+    async def reloadcfg(self, ctx):
+        self.bot.config = json.load(open('config_defaults.json')) | json.load(open('config.json'))
+        await ctx.message.add_reaction('\N{white heavy check mark}')
 
 
 def setup(bot):

@@ -16,6 +16,9 @@ class ErrorHandler(commands.Cog):
         self.bot = bot
         self.clean_logs.start()
 
+    def cog_unload(self):
+        self.clean_logs.cancel()
+
     @tasks.loop(hours=5)
     async def clean_logs(self):
         before = datetime.datetime.now() - datetime.timedelta(days=2)
@@ -41,7 +44,7 @@ class ErrorHandler(commands.Cog):
         elif isinstance(error, commands.UserInputError):
             formatted_error = re.sub(
                 # Error Name ('error message') -> Error name: error message
-                r" \('(.*)'\)", r': \1',
+                r" \(['\"](.*)['\"]\)", r': \1',
                 # split PascalCase
                 re.sub(r'([A-Z][a-z]+)', r'\1 ', repr(error))
             ).capitalize().strip('.')
@@ -59,7 +62,7 @@ class ErrorHandler(commands.Cog):
                 embed=discord.Embed(
                     color=0xfa5050,
                     title=':x: Check failed!',
-                    description=f'{error.message}'
+                    description=f'{error}'
                 )
             )
 
@@ -71,20 +74,26 @@ class ErrorHandler(commands.Cog):
             return
 
         else:
-            if isinstance(error, commands.CommandInvokeError):
-                await ctx.send(
-                    embed=discord.Embed(
-                        color=0xfa5050,
-                        title=":x: Uncaught error!",
-                        description=(
-                            "An uncaught error has occurred while processing your command:\n"
-                            f"`{error.original!r}`\n\n"
-                            "This has been automatically reported, feel free to open an issue on "
-                            "[my server](https://discord.gg/ZKHjRcy9bd) (or at my "
-                            "[github repo](https://github.com/dzshn/byter-rewrite/issues/new))"
-                        )
+            formatted_error = str(error)
+            if hasattr(error, 'original'):
+                formatted_error = repr(error.original)
+
+            if len(formatted_error) > 80:
+                formatted_error = formatted_error[:80] + '…'
+
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa5050,
+                    title=":x: Uncaught error!",
+                    description=(
+                        "An uncaught error has occurred while processing your command:\n"
+                        f"`{formatted_error}`\n\n"
+                        "This has been automatically reported, feel free to open an issue on "
+                        "[my server](https://discord.gg/ZKHjRcy9bd) (or at my "
+                        "[github repo](https://github.com/dzshn/byter-rewrite/issues/new))"
                     )
                 )
+            )
 
             dump_obj = {
                 "ctx": {

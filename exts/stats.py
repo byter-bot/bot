@@ -1,10 +1,10 @@
 import datetime
-import platform
+import random
 import time
 
 import psutil
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 
 class Stats(commands.Cog):
@@ -12,6 +12,54 @@ class Stats(commands.Cog):
         self.bot = bot
         self.commands_completed = 0
         self.commands_errored = 0
+        self.update_status.start()
+
+    def cog_unload(self):
+        self.update_status.cancel()
+
+    @tasks.loop(minutes=5)
+    async def update_status(self):
+        if random.randint(0, 25) == 15:
+            await self.bot.change_presence(activity=random.choice([
+                discord.Activity(
+                    name=random.choice(['C418', 'Disasterpeace', 'Datassette', 'Lifeformed']),
+                    type=discord.ActivityType.listening
+                ),
+                discord.Activity(
+                    name=random.choice([
+                        'C418 - surface pension', 'C418 - impostor syndrome', 'C418 - no pressure',
+                        'C418 - buildup errors', 'C418 - total drag', "C418 - this doesn't work"
+                    ]),
+                    type=discord.ActivityType.listening
+                ),
+                discord.Game(
+                    name='at /dev/' + random.choice(['tty', 'sda', 'mem', 'loop0', 'cpu', 'null'])
+                ),
+                discord.Game(name='did you know? this status only exists <1% of the time'),
+                None
+            ]))
+            return
+
+        await self.bot.change_presence(activity=random.choice([
+            discord.Game(name=f'at {len(self.bot.guilds)} servers!'),
+            discord.Activity(
+                name=f'for {self.bot.config["prefix"][0]}help',
+                type=discord.ActivityType.watching
+            ),
+            discord.Activity(
+                name='discord for '
+                    + str(int(
+                        (datetime.datetime.now().timestamp() - psutil.Process().create_time())
+                        / 3600
+                    ))
+                    + ' hours!',
+                type=discord.ActivityType.watching
+            )
+        ]))
+
+    @update_status.before_loop
+    async def before_update_status(self):
+        await self.bot.wait_until_ready()
 
     @commands.Cog.listener()
     async def on_command_completion(self, *_):
@@ -49,14 +97,17 @@ class Stats(commands.Cog):
             )
         )
 
-        proc_info = psutil.Process().as_dict(attrs=['cpu_percent', 'memory_percent'])
+        proc_info = psutil.Process().as_dict(attrs=['cpu_percent', 'memory_percent', 'create_time'])
+        bot_uptime = datetime.timedelta(seconds=time.time()-proc_info['create_time'])
+        bot_uptime = str(bot_uptime).split('.')[0]
         embed.add_field(
             name='Bot',
             value=(
                 f'Ws latency: {self.bot.latency*1000:.0f}ms\n'
                 f'Cached messages: {len(self.bot.cached_messages)}\n'
                 f'CPU: {proc_info["cpu_percent"]:.2f}%\n'
-                f'RAM: {proc_info["memory_percent"]:.2f}%'
+                f'RAM: {proc_info["memory_percent"]:.2f}%\n'
+                f'Uptime: {bot_uptime}'
             )
         )
 
