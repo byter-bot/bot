@@ -2,6 +2,7 @@ import io
 import json
 import random
 import re
+import typing
 
 import discord
 from discord.ext import commands
@@ -10,6 +11,36 @@ from discord.ext import commands
 class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(aliases=['emb'])
+    @commands.has_permissions(manage_messages=True)
+    async def embed(self, ctx, color: typing.Optional[discord.Color], title, *, description):
+        """Generates an embed with color, title and description
+
+        If color is omitted then it defaults to #5050fa"""
+        if color is None:
+            color = 0x5050fa
+
+        await ctx.send(embed=discord.Embed(color=color, title=title, description=description))
+
+    @commands.command(aliases=['remb'])
+    @commands.has_permissions(manage_messages=True)
+    async def embedraw(self, ctx, *, data: str):
+        try:
+            if not data.startswith('{') and not data.endswith('}'):
+                data = '{' + data + '}'
+
+            embed = discord.Embed.from_dict(json.loads(data))
+            await ctx.send(embed=embed)
+
+        except json.JSONDecodeError as error:
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa5050,
+                    title='Decode error!',
+                    description=f'Something went wrong parsing the JSON\n`{error!r}`'
+                )
+            )
 
     @commands.command(hidden=True)
     async def qa(self, ctx, *, question):
