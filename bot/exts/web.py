@@ -1,7 +1,5 @@
 import aiohttp
 import html
-import io
-import json
 import re
 import typing
 import urllib.parse
@@ -15,7 +13,7 @@ class Web(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['wiki'])
-    async def wikipedia(self, ctx, limit: typing.Optional[int]=4, *, query: urllib.parse.quote):
+    async def wikipedia(self, ctx, limit: typing.Optional[int] = 4, *, query: urllib.parse.quote):
         """Searches wikipedia
 
         You may optionally provide a limit for the results before the query (defaults to 4)"""
@@ -43,8 +41,10 @@ class Web(commands.Cog):
                 )
 
                 for index, obj in enumerate(data):
-                    link = f'… [link](https://wikipedia.org/wiki/{urllib.parse.quote(obj["title"])})'
                     desc = html.unescape(re.sub(r'<.*?>', '', obj['snippet']))[:256]
+                    link = (
+                        f'… [link](https://wikipedia.org/wiki/{urllib.parse.quote(obj["title"])})'
+                    )
                     embed.add_field(
                         name=f'{index+1}: {obj["title"]}',
                         value=desc + link,

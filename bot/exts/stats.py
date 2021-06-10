@@ -47,12 +47,12 @@ class Stats(commands.Cog):
                 type=discord.ActivityType.watching
             ),
             discord.Activity(
-                name='discord for '
-                    + str(int(
+                name=(
+                    'discord for ' + str(int(
                         (datetime.datetime.now().timestamp() - psutil.Process().create_time())
                         / 3600
-                    ))
-                    + ' hours!',
+                    )) + ' hours!'
+                ),
                 type=discord.ActivityType.watching
             )
         ]))

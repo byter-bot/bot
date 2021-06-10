@@ -31,7 +31,9 @@ class Info(commands.Cog):
 
             dt = datetime.datetime.now(datetime.timezone(offset))
             offset_formmated = re.sub(r"(-?\d\d?):?(\d\d)$", r"\1:\2", timezone)
-            if '-' not in timezone: offset_formmated = '+' + offset_formmated
+            if '-' not in timezone:
+                offset_formmated = '+' + offset_formmated
+
             await ctx.send(
                 embed=discord.Embed(
                     color=0x5050fa,
@@ -68,8 +70,8 @@ class Info(commands.Cog):
                     + ('+' if abs(dt.dst()) == dt.dst() else '-') \
                     + str(dt.dst()).removesuffix(':00')
 
-            zone_offset = ('+' if abs(dt.utcoffset()) == dt.utcoffset() else '-') \
-                        + str(abs(dt.utcoffset())).removesuffix(':00')
+            zone_offset = '+' if abs(dt.utcoffset()) == dt.utcoffset() else '-' \
+                + str(abs(dt.utcoffset())).removesuffix(':00')
 
             await ctx.send(
                 embed=discord.Embed(
@@ -116,8 +118,10 @@ class Info(commands.Cog):
                 ).set_thumbnail(url=member.avatar_url)
             )
 
-        except discord.NotFound: pass
-        else: return
+        except discord.NotFound:
+            pass
+        else:
+            return
 
         try:
             user = await self.bot.fetch_user(obj_id)
@@ -139,8 +143,10 @@ class Info(commands.Cog):
                 ).set_thumbnail(url=user.avatar_url)
             )
 
-        except discord.NotFound: pass
-        else: return
+        except discord.NotFound:
+            pass
+        else:
+            return
 
         if (channel := self.bot.get_channel(obj_id)):
             if isinstance(channel, discord.TextChannel):
