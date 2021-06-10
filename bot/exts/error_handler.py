@@ -14,6 +14,7 @@ from discord.ext import commands, tasks
 class ErrorHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.error_log_channel = bot.config['error_channel_id']
         self.clean_logs.start()
 
     def cog_unload(self):
@@ -22,9 +23,14 @@ class ErrorHandler(commands.Cog):
     @tasks.loop(hours=5)
     async def clean_logs(self):
         before = datetime.datetime.now() - datetime.timedelta(days=2)
-        log_hist = (await self.bot.fetch_channel(845464282338295808)).history(before=before)
-        async for log in log_hist:
+        async for log in self.bot.get_channel(self.error_log_channel).history(before=before):
             await log.delete()
+
+    @clean_logs.before_loop
+    async def before_clean_logs(self):
+        await self.bot.wait_until_ready()
+        if not self.bot.get_channel(self.error_log_channel):
+            self.clean_logs.cancel()
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -120,12 +126,16 @@ class ErrorHandler(commands.Cog):
                     type(error), error, error.__traceback__
                 )
 
-            await self.bot.get_channel(845464282338295808).send(
-                f"{hashlib.md5(ctx.author.id.to_bytes(10,'big')).hexdigest()}:"
-                f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()} "
-                f"<@{self.bot.owner_id}>",
-                file=discord.File(io.StringIO(json.dumps(dump_obj, indent=4)), 'dump.json')
-            )
+            if self.bot.error_log_channel:
+                await self.bot.get_channel(self.error_log_channel).send(
+                    f"{hashlib.md5(ctx.author.id.to_bytes(10,'big')).hexdigest()}:"
+                    f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()} "
+                    f"<@{self.bot.owner_id}>",
+                    file=discord.File(io.StringIO(json.dumps(dump_obj, indent=4)), 'dump.json')
+                )
+
+            else:
+                print(dump_obj)
 
 
 def setup(bot):
