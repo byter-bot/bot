@@ -44,9 +44,10 @@ class Web(commands.Cog):
 
                 for index, obj in enumerate(data):
                     link = f'… [link](https://wikipedia.org/wiki/{urllib.parse.quote(obj["title"])})'
+                    desc = html.unescape(re.sub(r'<.*?>', '', obj['snippet']))[:256]
                     embed.add_field(
                         name=f'{index+1}: {obj["title"]}',
-                        value=html.unescape(re.sub(r'<.*?>', '', obj['snippet'])),
+                        value=desc + link,
                         inline=False
                     )
 
