@@ -26,6 +26,12 @@ class ErrorHandler(commands.Cog):
         async for log in self.bot.get_channel(self.error_log_channel).history(before=before):
             await log.delete()
 
+    @clean_logs.before_loop
+    async def before_clean_logs(self):
+        await self.bot.wait_until_ready()
+        if not self.bot.get_channel(self.error_log_channel):
+            self.clean_logs.cancel()
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
