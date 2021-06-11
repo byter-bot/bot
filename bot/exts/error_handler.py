@@ -126,7 +126,7 @@ class ErrorHandler(commands.Cog):
                     type(error), error, error.__traceback__
                 )
 
-            if self.bot.error_log_channel:
+            if self.error_log_channel:
                 await self.bot.get_channel(self.error_log_channel).send(
                     f"{hashlib.md5(ctx.author.id.to_bytes(10,'big')).hexdigest()}:"
                     f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()} "
