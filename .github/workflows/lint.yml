@@ -18,8 +18,11 @@ jobs:
 
     - name: Install deps
       run: |
-        pip3 install poetry
-        poetry install
+        pip install poetry
+        poetry install --no-dev
+
+    - name: Install flake8 outside poetry env
+      run: pip install flake8
 
     - name: Lint with flake8
       run: "flake8 --format='::error file=%(path)s,line=%(row)d,col=%(col)d::[flake8] %(code)s: %(text)s'"
