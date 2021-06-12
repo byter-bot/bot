@@ -178,7 +178,7 @@ class Text(commands.Cog):
         """ｗｉｄｅ"""
         # Translate ascii -> fullwidth by adding 0xfee0, but use U+3000 for spaces
         translation_table = dict(zip(range(0x21, 0x7e), range(0xff01, 0xff5e)))
-        translation_table.update({0x21: 0x3000})
+        translation_table.update({0x20: 0x3000})
         fullwidth_text = text.translate(translation_table)
         await ctx.send(
             embed=discord.Embed(
