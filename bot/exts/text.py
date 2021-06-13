@@ -41,8 +41,8 @@ class Text(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['bin', 't2bin'])
-    async def text2binary(self, ctx, *, text: str):
+    @commands.command(aliases=['binary', 'bin'])
+    async def binaryencode(self, ctx, *, text: str):
         """Encodes given text to binary ascii"""
         encoded = ' '.join(f'{ord(i):0>8b}' for i in text)
         out, trunc = codeblock_and_trunc(encoded)
@@ -55,8 +55,8 @@ class Text(commands.Cog):
             file=trunc
         )
 
-    @commands.command(aliases=['bin2t'])
-    async def binary2text(self, ctx, *, text: str):
+    @commands.command(aliases=['bindec'])
+    async def binarydecode(self, ctx, *, text: str):
         """Decodes given binary text"""
         text = [i for i in text if i in '01']
         decoded = [text[i:i+8] for i in range(0, len(text), 8)]
@@ -71,8 +71,8 @@ class Text(commands.Cog):
             file=trunc
         )
 
-    @commands.command(aliases=['b64encode', 'base64', 'b64'])
-    async def text2base64(self, ctx, *, text: str):
+    @commands.command(aliases=['base64', 'b64'])
+    async def base64encode(self, ctx, *, text: str):
         """Encodes given text to base64"""
         encoded = base64.b64encode(text.encode()).decode()
         out, trunc = codeblock_and_trunc(encoded)
@@ -85,8 +85,8 @@ class Text(commands.Cog):
             file=trunc
         )
 
-    @commands.command(aliases=['b64decode', 'b642t', 'b64d'])
-    async def base642text(self, ctx, *, text: str):
+    @commands.command(aliases=['b64dec'])
+    async def base64decode(self, ctx, *, text: str):
         """Decodes given base64 text"""
         try:
             decoded = base64.b64decode(text.encode(), validate=True).decode()
@@ -265,7 +265,7 @@ class Text(commands.Cog):
             ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
         )
 
-    @commands.command(aliases=['img2text', 'asciiart'])
+    @commands.command(aliases=['asciiart'])
     async def textimg(self, ctx, width: typing.Optional[int] = 48):
         """Converts an image to text
 
