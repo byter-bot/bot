@@ -11,6 +11,19 @@ import discord
 from discord.ext import commands, tasks
 
 
+MESSAGE_UNCAUGHT_ERROR = """An uncaught error occurred while processing your command!
+`{}`
+
+This has been automatically reported, but feel free to open an issue on \
+[my server](https://discord.gg/ZKHjRcy9bd) or my \
+[github repo](https://github.com/byter-bot/bot/issues/new)!
+"""
+ASSET_CRASH = (
+    'https://cdn.discordapp.com/attachments/740003037141008504/856015954948653056/'
+    'byter_crash_mini.gif'
+)
+
+
 class ErrorHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -87,19 +100,14 @@ class ErrorHandler(commands.Cog):
             if len(formatted_error) > 80:
                 formatted_error = formatted_error[:80] + '…'
 
-            await ctx.send(
-                embed=discord.Embed(
-                    color=0xfa5050,
-                    title=":x: Uncaught error!",
-                    description=(
-                        "An uncaught error has occurred while processing your command:\n"
-                        f"`{formatted_error}`\n\n"
-                        "This has been automatically reported, feel free to open an issue on "
-                        "[my server](https://discord.gg/ZKHjRcy9bd) (or at my "
-                        "[github repo](https://github.com/dzshn/byter-rewrite/issues/new))"
-                    )
-                )
+            embed = discord.Embed(
+                color=0xfa5050, title='Uh oh..',
+                description=MESSAGE_UNCAUGHT_ERROR.format(formatted_error)
             )
+
+            embed.set_thumbnail(url=ASSET_CRASH)
+
+            await ctx.send(embed=embed)
 
             dump_obj = {
                 "ctx": {
@@ -128,8 +136,8 @@ class ErrorHandler(commands.Cog):
 
             if self.error_log_channel:
                 await self.bot.get_channel(self.error_log_channel).send(
-                    f"{hashlib.md5(ctx.author.id.to_bytes(10,'big')).hexdigest()}:"
-                    f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()}",
+                    f"{hashlib.md5(ctx.author.id.to_bytes(10, 'big')).hexdigest()}:"
+                    f"{hashlib.md5(ctx.message.id.to_bytes(10, 'big')).hexdigest()}",
                     file=discord.File(io.StringIO(json.dumps(dump_obj, indent=4)), 'dump.json')
                 )
 
