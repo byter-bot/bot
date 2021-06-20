@@ -94,6 +94,7 @@ class Fun(commands.Cog):
         board = np.zeros((size, size), int)
         score = 0
         move_count = 0
+        game_won = False
         while any(can_merge(board, direction) for direction in range(4)) or not board.any():
             for emote in ARROW_EMOTES:
                 await game.add_reaction(emote)
@@ -108,8 +109,9 @@ class Fun(commands.Cog):
             if valid_positions:
                 board[secrets.choice(valid_positions)] = 1 if secrets.randbelow(11) < 10 else 2
 
-            if 11 in board:  # 2^11 -> 2048
+            if not game_won and 11 in board:  # 2^11 -> 2048
                 await ctx.send('You reached 2048! Congratulations!!')
+                game_won = True
 
             await game.edit(
                 embed=discord.Embed(
