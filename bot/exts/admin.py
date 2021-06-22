@@ -157,6 +157,33 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
         self.bot.config = json.load(open('config_defaults.json')) | json.load(open('config.json'))
         await ctx.message.add_reaction('\N{white heavy check mark}')
 
+    @commands.command(aliases=['l'])
+    async def loadexts(self, ctx, *exts):
+        if len(exts) == 0:
+            await ctx.send(', '.join(f'`{i}`' for i in self.bot.extensions.keys()))
+            return
+
+        errors = []
+        for ext in exts:
+            ext = f'bot.exts.{ext}' if not ext.startswith('bot.exts.') else f'{ext}'
+            try:
+                if ext in self.bot.extensions:
+                    self.bot.reload_extension(ext)
+                else:
+                    self.bot.load_extension(ext)
+
+            except Exception as exc:
+                exc = repr(exc)
+                if len(exc) > 200:
+                    exc = exc[:200] + '…'
+
+                errors.append(traceback.format_exc())
+
+        if errors:
+            await ctx.send(file=discord.File(io.StringIO('\n'.join(errors)), 'errors.py'))
+
+        await ctx.message.add_reaction('\N{white heavy check mark}')
+
 
 def setup(bot):
     bot.add_cog(Admin(bot))
