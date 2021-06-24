@@ -92,6 +92,24 @@ class ErrorHandler(commands.Cog):
             await ctx.send(error)
             return
 
+        elif hasattr(error, 'original') and isinstance(error.original, discord.Forbidden):
+            try:
+                await ctx.send(
+                    embed=discord.Embed(
+                        color=0xfa5050,
+                        title='Permission error!',
+                        description=(
+                            "Looks like I'm missing permissions for something... If you believe "
+                            'that this is a mistake, please report this issue on my '
+                            '[my server](https://discord.gg/ZKHjRcy9bd) or my '
+                            '[github repo](https://github.com/byter-bot/bot/issues/new)!'
+                        )
+                    )
+                )
+
+            except discord.Forbidden:
+                await ctx.author.send("I don't have permission to talk in that channel!")
+
         else:
             formatted_error = str(error)
             if hasattr(error, 'original'):
