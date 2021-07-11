@@ -7,10 +7,10 @@ import time
 import typing
 import unicodedata
 
-import discord
 import PIL
-from discord.ext import commands
+import discord
 from PIL import Image
+from discord.ext import commands
 
 
 codeblock_wrapper = textwrap.TextWrapper(
