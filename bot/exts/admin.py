@@ -2,40 +2,31 @@ import asyncio
 import contextlib
 import io
 import json
+import pprint
 import textwrap
-import traceback
 import time
+import traceback
 
 import discord
 from discord.ext import commands
 
 
-codeblock_wrapper = textwrap.TextWrapper(
-    width=1000, placeholder='…', initial_indent='```py\n',
-    break_on_hyphens=False, replace_whitespace=False,
-    drop_whitespace=False
-)
-
-
-def format_codeblock(text: str):
-    text = str(text)
-    if text == '':
+def format_codeblock(content):
+    if not str(content):
         return None
 
-    formatted = codeblock_wrapper.fill(text)
-    if len(formatted) > 1000:
-        formatted = formatted[:1000] + '…'
+    formatted = pprint.pformat(content, width=51, compact=True)
+    if len(formatted) > 1014:
+        formatted = formatted[:1013] + '…'
 
-    formatted = formatted + '\n```'
-
-    return formatted
+    return f'```py\n{formatted}\n```'
 
 
 def get_files(*contents):
     files = []
-    for text in map(str, contents):
-        if text and len(codeblock_wrapper.fill(text)) > 1000:
-            files.append(discord.File(io.StringIO(text), 'trunc.py'))
+    for content in contents:
+        if len(pprint.pformat(content, width=51, compact=True)) > 1014:
+            files.append(discord.File(io.StringIO(pprint.pformat(content, width=128))))
 
     return files
 
