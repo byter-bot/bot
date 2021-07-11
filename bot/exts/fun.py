@@ -22,9 +22,10 @@ class Fun(commands.Cog):
 
         for reaction, triggers in self.bot.config['reactions'].items():
             for trigger in triggers:
-                match = re.search(
+                match = re.search(  # match trigger if it's a word, ignore non-word characters
                     r'(\s|^){}+(\s|$)'.format(trigger),
-                    re.sub(r'[^a-z\s]', '', message.content.lower())
+                    re.sub(r'[^\w\s]', '', message.content),
+                    flags=re.IGNORECASE
                 )
 
                 if match:
