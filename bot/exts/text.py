@@ -2,7 +2,6 @@ import base64
 import hashlib
 import io
 import re
-import textwrap
 import time
 import typing
 import unicodedata
@@ -12,28 +11,7 @@ import discord
 from PIL import Image
 from discord.ext import commands
 
-
-codeblock_wrapper = textwrap.TextWrapper(
-    width=1000, placeholder='…', initial_indent='```nim\n',
-    break_on_hyphens=False, replace_whitespace=False,
-    drop_whitespace=False
-)
-
-
-def codeblock_and_trunc(text: str):
-    """Utility function to return codeblock + file if it exceeds 600 chars"""
-    trunc = None
-    text = str(text)
-    if text == '':
-        return None, None
-
-    formatted = codeblock_wrapper.fill(text)
-    if len(formatted) > 600:
-        trunc = discord.File(io.StringIO(textwrap.fill(text)), 'trunc.txt')
-        formatted = formatted[:400] + '…'
-
-    formatted = formatted + '\n```'
-    return formatted, trunc
+from bot.utils.formatting import codeblock
 
 
 class Text(commands.Cog):
@@ -45,14 +23,13 @@ class Text(commands.Cog):
     async def binaryencode(self, ctx, *, text: str):
         """Encodes given text to binary ascii"""
         encoded = ' '.join(f'{ord(i):0>8b}' for i in text)
-        out, trunc = codeblock_and_trunc(encoded)
         await ctx.send(
             embed=discord.Embed(
                 color=0x50fa50,
                 title='Encoded binary text',
-                description=out
+                description=codeblock(encoded, fmt='c')
             ),
-            file=trunc
+            file=discord.File(io.StringIO(encoded), 'trunc.txt') if len(encoded) > 1015 else None
         )
 
     @commands.command(aliases=['bindec'])
@@ -61,28 +38,26 @@ class Text(commands.Cog):
         text = [i for i in text if i in '01']
         decoded = [text[i:i+8] for i in range(0, len(text), 8)]
         decoded = ''.join(chr(int(''.join(i), base=2)) for i in decoded)
-        out, trunc = codeblock_and_trunc(decoded)
         await ctx.send(
             embed=discord.Embed(
                 color=0x50fa50,
                 title='Decoded binary text',
-                description=out
+                description=codeblock(decoded, fmt=None)
             ),
-            file=trunc
+            file=discord.File(io.StringIO(decoded), 'trunc.txt') if len(decoded) > 1016 else None
         )
 
     @commands.command(aliases=['base64', 'b64'])
     async def base64encode(self, ctx, *, text: str):
         """Encodes given text to base64"""
         encoded = base64.b64encode(text.encode()).decode(errors='replace')
-        out, trunc = codeblock_and_trunc(encoded)
         await ctx.send(
             embed=discord.Embed(
                 color=0x5050fa,
                 title='Encoded base64 text',
-                description=out
+                description=codeblock(encoded, fmt=None)
             ),
-            file=trunc
+            file=discord.File(io.StringIO(encoded), 'trunc.txt') if len(encoded) > 1016 else None
         )
 
     @commands.command(aliases=['b64dec'])
@@ -94,14 +69,13 @@ class Text(commands.Cog):
         except base64.binascii.Error:
             raise commands.UserInputError('invalid base64 code given')
 
-        out, trunc = codeblock_and_trunc(decoded)
         await ctx.send(
             embed=discord.Embed(
                 color=0x5050fa,
                 title='Decoded base64 text',
-                description=out
+                description=codeblock(decoded, fmt=None)
             ),
-            file=trunc
+            file=discord.File(io.StringIO(decoded), 'trunc.txt') if len(decoded) > 1016 else None
         )
 
     @commands.command(aliases=['uc'])
