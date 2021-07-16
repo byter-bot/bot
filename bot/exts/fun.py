@@ -63,7 +63,7 @@ class Fun(commands.Cog):
         tiles = self.bot.config['minigame_emoji']['2048']
 
         def comp(line):
-            '''Move cells left. 0 2 0 2 -> 2 2 0 0'''
+            """Move cells left. 0 2 0 2 -> 2 2 0 0"""
             for index, cell, n_cell in zip(range(len(line)), line[:-1], line[1:]):
                 if cell == 0 and n_cell > 0:  # Swap cells if valid and skip to next iteration
                     line[index:index+2] = (n_cell, 0)
@@ -73,7 +73,7 @@ class Fun(commands.Cog):
             return comp(line)
 
         def merge_line(line, score):
-            '''Merge and move cells left, merging only happens once per cell'''
+            """Merge and move cells left, merging only happens once per cell"""
             line = comp(line)
             for index, cell, n_cell in zip(range(len(line)), line[:-1], line[1:]):
                 if cell != 0 and cell == n_cell:
@@ -82,7 +82,7 @@ class Fun(commands.Cog):
             return comp(line), score
 
         def merge_lines(board, direction, score):
-            '''Merge all lines within a board in given direction'''
+            """Merge all lines within a board in given direction"""
             merged = np.rot90(board.copy(), k=direction)
             for index, line in enumerate(merged):
                 merged[index], score = merge_line(line, score)
@@ -90,7 +90,7 @@ class Fun(commands.Cog):
             return np.rot90(merged, k=direction * -1), score
 
         def can_merge(board, direction):
-            '''Check if any movement is posible'''
+            """Check if any movement is posible"""
             return not np.array_equal(board, merge_lines(board, direction, 0)[0])
 
         game = await ctx.send(embed=discord.Embed(color=0xfafafa, title='Just a bit...'))

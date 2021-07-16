@@ -6,7 +6,7 @@ from discord.ext import commands
 
 
 class QaSession:
-    '''Object storing questions in events with an Q&A'''
+    """Object storing questions in events with an Q&A"""
     def __init__(self):
         self.questions = []
         self.seen = []
