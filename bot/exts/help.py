@@ -1,13 +1,14 @@
 import itertools
+from typing import List, Mapping, Optional
 
 import discord
 from discord.ext import commands
 
 
 class EmbedHelpCommand(commands.HelpCommand):
-    async def send_bot_help(self, mapping):
-        ctx = self.context
-        bot = ctx.bot
+    async def send_bot_help(self, mapping: Mapping[Optional[commands.Cog], List[commands.Command]]):
+        ctx: commands.Context = self.context
+        bot: commands.Bot = ctx.bot
         embed = discord.Embed(
             color=0x5050fa,
             title='Hey there!',
@@ -18,7 +19,7 @@ class EmbedHelpCommand(commands.HelpCommand):
             )
         )
 
-        def get_category(command):
+        def get_category(command: commands.Command) -> str:
             if command.cog:
                 return command.cog.qualified_name
 
@@ -54,7 +55,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.context.send(embed=embed)
 
     async def send_command_help(self, command: commands.Command):
-        ctx = self.context
+        ctx: commands.Context = self.context
         embed = discord.Embed(
             color=0x5050fa,
             title=command.name,
@@ -84,7 +85,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         await ctx.send(embed=embed)
 
     async def send_group_help(self, group: commands.Group):
-        ctx = self.context
+        ctx: commands.Context = self.context
         embed = discord.Embed(
             color=0x5050fa,
             title=group.name,
@@ -129,7 +130,7 @@ class Help(commands.Cog):
         self.bot.help_command = commands.DefaultHelpCommand()
 
     @commands.command(name='commands')
-    async def _commands(self, ctx):
+    async def _commands(self, ctx: commands.Context):
         """Lists available commands"""
         await ctx.send(
             embed=discord.Embed(
@@ -143,7 +144,7 @@ class Help(commands.Cog):
         )
 
     @commands.command()
-    async def prefix(self, ctx):
+    async def prefix(self, ctx: commands.Context):
         """Shows the bot's prefix"""
         prefix = self.bot.config['prefix']
         if len(prefix) > 1:

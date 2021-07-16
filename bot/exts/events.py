@@ -44,7 +44,7 @@ class Events(commands.Cog, command_attrs={'hidden': True}):
         return ctx.guild.id == self.bot.config['main_guild_id']
 
     @commands.command()
-    async def qa(self, ctx, *, question):
+    async def qa(self, ctx: commands.Context, *, question: str):
         if self.qa_session.is_closed:
             raise commands.CheckFailure("There isn't an qa session running")
 
@@ -53,7 +53,7 @@ class Events(commands.Cog, command_attrs={'hidden': True}):
 
     @commands.command()
     @commands.check_any(commands.is_owner(), commands.has_any_role('Créu Chief', 'Créu Crew'))
-    async def qastart(self, ctx):
+    async def qastart(self, ctx: commands.Context):
         if self.qa_session.is_open:
             raise commands.CheckFailure('An qa session is already running')
 
@@ -62,7 +62,7 @@ class Events(commands.Cog, command_attrs={'hidden': True}):
 
     @commands.command()
     @commands.check_any(commands.is_owner(), commands.has_any_role('Créu Chief', 'Créu Crew'))
-    async def qaend(self, ctx):
+    async def qaend(self, ctx: commands.Context):
         if self.qa_session.is_closed:
             raise commands.CheckFailure("There isn't an qa session running")
 
@@ -91,7 +91,7 @@ class Events(commands.Cog, command_attrs={'hidden': True}):
         commands.is_owner(),
         commands.has_any_role('Créu Chief', 'Créu Curator', 'Créu Captain')
     )
-    async def qpick(self, ctx):
+    async def qpick(self, ctx: commands.Context):
         if self.qa_session.is_closed:
             raise commands.CheckFailure("There isn't an qa session running")
 

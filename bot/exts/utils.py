@@ -1,6 +1,6 @@
 import json
 import re
-import typing
+from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -12,7 +12,13 @@ class Utils(commands.Cog):
 
     @commands.command(aliases=['emb'])
     @commands.has_permissions(manage_messages=True)
-    async def embed(self, ctx, color: typing.Optional[discord.Color], title, *, description):
+    async def embed(
+        self,
+        ctx: commands.Context,
+        color: Optional[discord.Color],
+        title: str,
+        *, description: str
+    ):
         """Generates an embed with color, title and description
 
         If color is omitted then it defaults to #5050fa"""
@@ -23,7 +29,7 @@ class Utils(commands.Cog):
 
     @commands.command(aliases=['remb'])
     @commands.has_permissions(manage_messages=True)
-    async def embedraw(self, ctx, *, data: str):
+    async def embedraw(self, ctx: commands.Context, *, data: str):
         try:
             if not data.startswith('{'):
                 data = '{' + data + '}'
@@ -41,7 +47,7 @@ class Utils(commands.Cog):
             )
 
     @commands.command()
-    async def poll(self, ctx, *, poll: str):
+    async def poll(self, ctx: commands.Context, *, poll: str):
         """Create a poll
 
         A poll consists of title, optional description and options,

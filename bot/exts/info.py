@@ -11,7 +11,7 @@ from discord.ext import commands
 
 
 class Info(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command()
@@ -90,7 +90,7 @@ class Info(commands.Cog):
 
     @commands.command(aliases=['?', 'whois'])
     @commands.cooldown(3, 10)
-    async def whatis(self, ctx, obj_id):
+    async def whatis(self, ctx: commands.Context, obj_id: str):
         """Tries to fetch & gather info about an ID or object"""
         obj_id = int(''.join(i for i in obj_id if i.isdecimal()))
         with contextlib.suppress(discord.NotFound):
@@ -237,7 +237,7 @@ class Info(commands.Cog):
         await ctx.send('No object was found')
 
     @commands.command()
-    async def ping(self, ctx):
+    async def ping(self, ctx: commands.Context):
         """Pong!"""
         init_time = time.perf_counter()
         ping_msg = await ctx.send(
@@ -263,7 +263,7 @@ class Info(commands.Cog):
         )
 
     @commands.command(hidden=True)
-    async def pong(self, ctx):
+    async def pong(self, ctx: commands.Context):
         await ctx.send(
             embed=discord.Embed(
                 color=0xfab0d0,
@@ -277,5 +277,5 @@ class Info(commands.Cog):
         )
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(Info(bot))

@@ -6,6 +6,7 @@ import pprint
 import textwrap
 import time
 import traceback
+from typing import List
 
 import discord
 from discord.ext import commands
@@ -18,11 +19,11 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
         self.bot = bot
         self._last_eval_value = None
 
-    def cog_check(self, ctx):
+    def cog_check(self, ctx: commands.Context):
         return self.bot.is_owner(ctx.author)
 
     @commands.command(aliases=['.'])
-    async def eval(self, ctx, *, code: str):
+    async def eval(self, ctx: commands.Context, *, code: str):
         if code.startswith('```'):
             code = '\n'.join(code.splitlines()[1:-1])
 
@@ -113,7 +114,7 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
                 self._last_eval_value = code_return
 
     @commands.command(aliases=['h'])
-    async def shell(self, ctx, *, command):
+    async def shell(self, ctx: commands.Context, *, command: str):
         command = '\n'.join(command.splitlines()[1:-1]) \
                     if command.startswith('```') \
                     else command.strip('` ')
@@ -152,12 +153,12 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
         )
 
     @commands.command()
-    async def reloadcfg(self, ctx):
+    async def reloadcfg(self, ctx: commands.Context):
         self.bot.config = json.load(open('config_defaults.json')) | json.load(open('config.json'))
         await ctx.message.add_reaction('\N{white heavy check mark}')
 
     @commands.command(aliases=['l'])
-    async def loadexts(self, ctx, *exts):
+    async def loadexts(self, ctx: commands.Context, *exts: List[str]):
         if len(exts) == 0:
             await ctx.send(', '.join(f'`{i}`' for i in self.bot.extensions.keys()))
             return

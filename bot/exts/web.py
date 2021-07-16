@@ -1,7 +1,7 @@
 import html
 import re
-import typing
 import urllib.parse
+from typing import Optional
 
 import aiohttp
 import discord
@@ -13,7 +13,7 @@ class Web(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['wiki'])
-    async def wikipedia(self, ctx, limit: typing.Optional[int] = 4, *, query: str):
+    async def wikipedia(self, ctx: commands.Context, limit: Optional[int] = 4, *, query: str):
         """Searches wikipedia
 
         You may optionally provide a limit for the results before the query (defaults to 4)"""
