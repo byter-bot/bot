@@ -92,7 +92,12 @@ class Info(commands.Cog):
     @commands.cooldown(3, 10)
     async def whatis(self, ctx: commands.Context, obj_id: str):
         """Tries to fetch & gather info about an ID or object"""
-        obj_id = int(''.join(i for i in obj_id if i.isdecimal()))
+        try:
+            obj_id = int(''.join(i for i in obj_id if i.isdecimal()))
+
+        except ValueError:
+            raise commands.BadArgument('not an id or mention')
+
         with contextlib.suppress(discord.NotFound):
             member = await ctx.guild.fetch_member(obj_id)
             flags = [
