@@ -13,11 +13,7 @@ class Utils(commands.Cog):
     @commands.command(aliases=['emb'])
     @commands.has_permissions(manage_messages=True)
     async def embed(
-        self,
-        ctx: commands.Context,
-        color: Optional[discord.Color],
-        title: str,
-        *, description: str
+        self, ctx: commands.Context, color: Optional[discord.Color], title: str, *, description: str
     ):
         """Generates an embed with color, title and description
 
@@ -75,8 +71,8 @@ class Utils(commands.Cog):
                 title=title.strip(),
                 timestamp=ctx.message.created_at,
                 description=(
-                    description
-                    + '<:hand_thumbsup:757023230073634922> / <:hand_thumbsdown:757019524058054686>'
+                    description +
+                    '<:hand_thumbsup:757023230073634922> / <:hand_thumbsdown:757019524058054686>'
                 )
             )
 
@@ -102,9 +98,8 @@ class Utils(commands.Cog):
             description += '\n\n'
 
         poll = [
-            re.match(r'(<:.*:\d*>|[^:]*):(.*)', opt.strip()).groups()
-            if ':' in opt else (chr(0x1f1e6 + index), opt.strip())
-            for index, opt in enumerate(poll.split(','))
+            re.match(r'(<:.*:\d*>|[^:]*):(.*)', opt.strip()).groups() if ':' in opt else
+            (chr(0x1f1e6 + index), opt.strip()) for index, opt in enumerate(poll.split(','))
         ]
 
         if len(poll) > 20:

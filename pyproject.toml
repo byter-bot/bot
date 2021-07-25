@@ -15,6 +15,16 @@ numpy = "^1.20.3"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.2"
+yapf = "^0.31.0"
+toml = "^0.10.2"
+
+[tool.yapf]
+based_on_style = "google"
+column_limit = 110
+blank_line_before_nested_class_or_def = false
+dedent_closing_brackets = true
+split_before_dot = true
+coalesce_brackets = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

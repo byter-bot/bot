@@ -51,24 +51,11 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
                 description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
 
-            embed.add_field(
-                name='Traceback',
-                value=codeblock(traceback_formatted),
-                inline=False
-            )
-
-            embed.add_field(
-                name='Return',
-                value=codeblock(return_formatted),
-                inline=False
-            )
+            embed.add_field(name='Traceback', value=codeblock(traceback_formatted), inline=False)
+            embed.add_field(name='Return', value=codeblock(return_formatted), inline=False)
 
             if stdout_formatted:
-                embed.add_field(
-                    name='Stdout',
-                    value=codeblock(stdout_formatted),
-                    inline=False
-                )
+                embed.add_field(name='Stdout', value=codeblock(stdout_formatted), inline=False)
 
             await ctx.send(
                 embed=embed,
@@ -87,18 +74,10 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
                 title=":white_check_mark: Code evaluated",
                 description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
-            embed.add_field(
-                name='Return',
-                value=codeblock(return_formatted),
-                inline=False
-            )
+            embed.add_field(name='Return', value=codeblock(return_formatted), inline=False)
 
             if stdout_formatted:
-                embed.add_field(
-                    name='Stdout',
-                    value=codeblock(stdout_formatted),
-                    inline=False
-                )
+                embed.add_field(name='Stdout', value=codeblock(stdout_formatted), inline=False)
 
             await ctx.send(
                 embed=embed,

@@ -7,7 +7,6 @@ from discord.ext import commands
 
 from bot import exts
 
-
 CFG = json.load(open('config_defaults.json')) | json.load(open('config.json'))
 
 

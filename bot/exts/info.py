@@ -54,8 +54,7 @@ class Info(commands.Cog):
 
             except zoneinfo.ZoneInfoNotFoundError:
                 match_name = fuzzywuzzy.process.extractOne(
-                    timezone, zoneinfo.available_timezones(),
-                    scorer=fuzzywuzzy.fuzz.WRatio, score_cutoff=65
+                    timezone, zoneinfo.available_timezones(), scorer=fuzzywuzzy.fuzz.WRatio, score_cutoff=65
                 )
 
                 if match_name is None:
@@ -100,10 +99,7 @@ class Info(commands.Cog):
 
         with contextlib.suppress(discord.NotFound):
             member = await ctx.guild.fetch_member(obj_id)
-            flags = [
-                name.replace('_', ' ').capitalize()
-                for name, val in iter(member.public_flags) if val
-            ]
+            flags = [name.replace('_', ' ').capitalize() for name, val in iter(member.public_flags) if val]
             if member.bot:
                 flags.append('Bot')
 
@@ -129,10 +125,7 @@ class Info(commands.Cog):
 
         with contextlib.suppress(discord.NotFound):
             user = await self.bot.fetch_user(obj_id)
-            flags = [
-                name.replace('_', ' ').capitalize()
-                for name, val in iter(user.public_flags) if val
-            ]
+            flags = [name.replace('_', ' ').capitalize() for name, val in iter(user.public_flags) if val]
             if user.bot:
                 flags.append('Bot')
 
@@ -249,10 +242,8 @@ class Info(commands.Cog):
             embed=discord.Embed(
                 color=0x50fa80,
                 title='Pong!',
-                description=(
-                    f'Ws latency: {self.bot.latency*1000:.0f}ms\n'
-                    f'Bot latency: ...'
-                )
+                description=(f'Ws latency: {self.bot.latency*1000:.0f}ms\n'
+                             f'Bot latency: ...')
             )
         )
 
@@ -270,15 +261,9 @@ class Info(commands.Cog):
     @commands.command(hidden=True)
     async def pong(self, ctx: commands.Context):
         await ctx.send(
-            embed=discord.Embed(
-                color=0xfab0d0,
-                title='no way！！',
-                description='ʰᵒʷ'
-            ).set_image(
+            embed=discord.Embed(color=0xfab0d0, title='no way！！', description='ʰᵒʷ').set_image(
                 url='https://media.giphy.com/media/fvA1ieS8rEV8Y/giphy.gif'
-            ).set_footer(
-                text='how they doing that??⁇?⁈'
-            )
+            ).set_footer(text='how they doing that??⁇?⁈')
         )
 
 
