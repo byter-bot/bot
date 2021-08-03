@@ -335,6 +335,22 @@ class SafeEvaluator(ast.NodeVisitor):
     def visit_BinOp(self, node: ast.BinOp) -> Any:
         return OPERATORS[type(node.op)](self.visit(node.left), self.visit(node.right))
 
+    def visit_BoolOp(self, node: ast.BoolOp) -> Any:
+        res = None
+        if type(node.op) == ast.And:
+            for value in node.values:
+                res = self.visit(value)
+                if not res:
+                    break
+            return res
+
+        if type(node.op) == ast.Or:
+            for value in node.values:
+                res = self.visit(value)
+                if res:
+                    break
+            return res
+
     def visit_UnaryOp(self, node: ast.UnaryOp) -> Any:
         return OPERATORS[type(node.op)](self.visit(node.operand))
 
