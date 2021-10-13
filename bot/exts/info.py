@@ -267,20 +267,6 @@ class Info(commands.Cog):
             )
         )
 
-    @commands.command(hidden=True)
-    async def pong(self, ctx: commands.Context):
-        await ctx.send(
-            embed=discord.Embed(
-                color=0xfab0d0,
-                title='no way！！',
-                description='ʰᵒʷ'
-            ).set_image(
-                url='https://media.giphy.com/media/fvA1ieS8rEV8Y/giphy.gif'
-            ).set_footer(
-                text='how they doing that??⁇?⁈'
-            )
-        )
-
 
 def setup(bot):
     bot.add_cog(Info(bot))
