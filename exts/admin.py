@@ -19,7 +19,7 @@ def format_codeblock(text: str):
     if text == '':
         return None
 
-    formatted = codeblock_wrapper.fill(str(text))
+    formatted = codeblock_wrapper.fill(text)
     if len(formatted) > 1000:
         formatted = formatted[:1000] + '…'
 
@@ -39,6 +39,7 @@ def get_files(*contents):
 class Admin(commands.Cog, command_attrs={"hidden": True}):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self._last_eval_value = None
 
     def cog_check(self, ctx):
         return self.bot.is_owner(ctx.author)
@@ -54,7 +55,8 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
         code = 'async def func():\n' + textwrap.indent(code, '  ')
         code_return = '<empty>'
         code_stdout = io.StringIO()
-        env = {**globals()|locals()}
+        env = {'_': self._last_eval_value, 'b': self.bot}
+        env.update(globals()|locals())
         try:
             exec_time = time.perf_counter()
             exec(code, env)
@@ -103,6 +105,8 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
                 files=get_files(code_return, code_stdout.getvalue())
             )
 
+            if code_return is not None:
+                self._last_eval_value = code_return
 
 def setup(bot):
     bot.add_cog(Admin(bot))

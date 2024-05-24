@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import io
 import json
@@ -13,6 +14,14 @@ from discord.ext import commands, tasks
 class ErrorHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.clean_logs.start()
+
+    @tasks.loop(hours=5)
+    async def clean_logs(self):
+        before = datetime.datetime.now() - datetime.timedelta(days=2)
+        log_hist = (await self.bot.fetch_channel(845464282338295808)).history(before=before)
+        async for log in log_hist:
+            await log.delete()
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -31,11 +40,11 @@ class ErrorHandler(commands.Cog):
 
         elif isinstance(error, commands.UserInputError):
             formatted_error = re.sub(
-                # Error Name ('error message.') -> Error name: error message
-                r" \('(.*)\.'\)", r': \1',
+                # Error Name ('error message') -> Error name: error message
+                r" \('(.*)'\)", r': \1',
                 # split PascalCase
                 re.sub(r'([A-Z][a-z]+)', r'\1 ', repr(error))
-            ).capitalize()
+            ).capitalize().strip('.')
 
             await ctx.send(
                 embed=discord.Embed(
@@ -104,7 +113,8 @@ class ErrorHandler(commands.Cog):
 
             await self.bot.get_channel(845464282338295808).send(
                 f"{hashlib.md5(ctx.author.id.to_bytes(10,'big')).hexdigest()}:"
-                f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()}",
+                f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()} "
+                f"<@{self.bot.owner_id}>",
                 file=discord.File(io.StringIO(json.dumps(dump_obj, indent=4)), 'dump.json')
             )
 
