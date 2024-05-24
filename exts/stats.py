@@ -49,14 +49,17 @@ class Stats(commands.Cog):
             )
         )
 
-        proc_info = psutil.Process().as_dict(attrs=['cpu_percent', 'memory_percent'])
+        proc_info = psutil.Process().as_dict(attrs=['cpu_percent', 'memory_percent', 'create_time'])
+        bot_uptime = datetime.timedelta(seconds=time.time()-proc_info['create_time'])
+        bot_uptime = str(bot_uptime).split('.')[0]
         embed.add_field(
             name='Bot',
             value=(
                 f'Ws latency: {self.bot.latency*1000:.0f}ms\n'
                 f'Cached messages: {len(self.bot.cached_messages)}\n'
                 f'CPU: {proc_info["cpu_percent"]:.2f}%\n'
-                f'RAM: {proc_info["memory_percent"]:.2f}%'
+                f'RAM: {proc_info["memory_percent"]:.2f}%\n'
+                f'Uptime: {bot_uptime}'
             )
         )
 
