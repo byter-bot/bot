@@ -403,6 +403,7 @@ class Math(commands.Cog):
 
     @commands.command(aliases=['bf'])
     async def brainf(self, ctx: commands.Context, *, code: str):
+        """Evaluate [b\\*\\*\\*nfuck code](https://esolangs.org/wiki/Brainfuck)"""
         eval_time = time.perf_counter()
         instructions = [i for i in code.split('&')[0] if i in '+-,.<>[]']
         depth = 0
@@ -498,7 +499,7 @@ class Math(commands.Cog):
         else:
             embed = discord.Embed(
                 color=0x5050fa,
-                title='',
+                title=f':white_check_mark: Evaluated {len(instructions)} instructions',
                 description=f'Operated {cycles} cycles in {(time.perf_counter()-eval_time)*1000:g}ms'
             )
 
@@ -543,6 +544,7 @@ class Math(commands.Cog):
 
     @commands.command()
     async def functions(self, ctx: commands.Context):
+        """List available functions and constants for the calc command"""
         evallib = EvalLib()
         embed = discord.Embed(color=0x5050fa)
         embed.add_field(
@@ -557,6 +559,9 @@ class Math(commands.Cog):
 
     @commands.command(aliases=['calc', 'c'])
     async def calculate(self, ctx: commands.Context, *, expression: str):
+        """Evaluate a math expression
+
+        Uses python syntax, see built-in functions and constants with the functions command"""
         eval_time = time.perf_counter()
         try:
             evaluator = SafeEvaluator(expression)
