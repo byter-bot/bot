@@ -16,6 +16,9 @@ class ErrorHandler(commands.Cog):
         self.bot = bot
         self.clean_logs.start()
 
+    def cog_unload(self):
+        self.clean_logs.cancel()
+
     @tasks.loop(hours=5)
     async def clean_logs(self):
         before = datetime.datetime.now() - datetime.timedelta(days=2)

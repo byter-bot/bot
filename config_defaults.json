@@ -5,5 +5,6 @@
         "guilds": true,
         "guild_messages": true,
         "guild_reactions": true
-    }
+    },
+    "main_guild_id": 0
 }
