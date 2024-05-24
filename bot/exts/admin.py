@@ -10,25 +10,7 @@ import traceback
 import discord
 from discord.ext import commands
 
-
-def format_codeblock(content):
-    if not str(content):
-        return None
-
-    formatted = pprint.pformat(content, width=51, compact=True)
-    if len(formatted) > 1014:
-        formatted = formatted[:1013] + '…'
-
-    return f'```py\n{formatted}\n```'
-
-
-def get_files(*contents):
-    files = []
-    for content in contents:
-        if len(pprint.pformat(content, width=51, compact=True)) > 1014:
-            files.append(discord.File(io.StringIO(pprint.pformat(content, width=128))))
-
-    return files
+from bot.utils.formatting import codeblock
 
 
 class Admin(commands.Cog, command_attrs={"hidden": True}):
@@ -59,46 +41,72 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
             with contextlib.redirect_stdout(code_stdout):
                 code_return = await env['func']()
 
-        except:  # noqa: E722
-            return_formatted = format_codeblock(code_return)
-            stdout_formatted = format_codeblock(code_stdout.getvalue())
-            traceback_formatted = format_codeblock(traceback.format_exc(-1))
+        except Exception:
+            return_formatted = pprint.pformat(code_return, compact=True, width=51)
+            stdout_formatted = code_stdout.getvalue()
+            traceback_formatted = traceback.format_exc(-1)
             embed = discord.Embed(
                 color=0xfa5050,
                 title=":x: error!",
                 description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
 
-            embed.add_field(name='Traceback', value=traceback_formatted, inline=False)
-            embed.add_field(name='Return', value=return_formatted, inline=False)
+            embed.add_field(
+                name='Traceback',
+                value=codeblock(traceback_formatted),
+                inline=False
+            )
+
+            embed.add_field(
+                name='Return',
+                value=codeblock(return_formatted),
+                inline=False
+            )
+
             if stdout_formatted:
-                embed.add_field(name='Stdout', value=stdout_formatted, inline=False)
+                embed.add_field(
+                    name='Stdout',
+                    value=codeblock(stdout_formatted),
+                    inline=False
+                )
 
             await ctx.send(
                 embed=embed,
-                files=get_files(code_return, code_stdout.getvalue(), traceback.format_exc(-1))
+                files=[
+                    discord.File(io.StringIO(i), 'full.txt')
+                    for i in [return_formatted, stdout_formatted, traceback_formatted]
+                    if len(i) == 1024
+                ]
             )
 
         else:
-            return_formatted = format_codeblock(code_return)
-            stdout_formatted = format_codeblock(code_stdout.getvalue())
+            return_formatted = pprint.pformat(code_return, compact=True, width=51)
+            stdout_formatted = code_stdout.getvalue()
             embed = discord.Embed(
                 color=0x50fa50,
                 title=":white_check_mark: Code evaluated",
                 description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
             embed.add_field(
-                name='Return', value=return_formatted, inline=False
+                name='Return',
+                value=codeblock(return_formatted),
+                inline=False
             )
 
             if stdout_formatted:
                 embed.add_field(
-                    name='Stdout', value=stdout_formatted, inline=False
+                    name='Stdout',
+                    value=codeblock(stdout_formatted),
+                    inline=False
                 )
 
             await ctx.send(
                 embed=embed,
-                files=get_files(code_return, code_stdout.getvalue())
+                files=[
+                    discord.File(io.StringIO(i), 'full.txt')
+                    for i in [return_formatted, stdout_formatted]
+                    if len(i) == 1024
+                ]
             )
 
             if code_return is not None:
@@ -116,8 +124,8 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
         )
 
         stdout, stderr = await proc.communicate()
-        stdout_formatted = format_codeblock(stdout.decode())
-        stderr_formatted = format_codeblock(stderr.decode())
+        stdout_formatted = stdout.decode()
+        stderr_formatted = stderr.decode()
         if proc.returncode == 0:
             embed = discord.Embed(
                 color=0x50fa50,
@@ -132,16 +140,16 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
                 description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
 
-        if stdout_formatted is None and stderr_formatted is None:
-            embed.description = 'no output · ' + embed.description
-
-        if stdout_formatted is not None:
-            embed.add_field(name='Stdout:', value=stdout_formatted, inline=False)
-
-        if stderr_formatted is not None:
-            embed.add_field(name='Stderr:', value=stderr_formatted, inline=False)
-
-        await ctx.send(embed=embed, files=get_files(stdout.decode(), stderr.decode()))
+        embed.add_field(name='Stdout:', value=codeblock(stdout_formatted, fmt=None), inline=False)
+        embed.add_field(name='Stderr:', value=codeblock(stderr_formatted, fmt=None), inline=False)
+        await ctx.send(
+            embed=embed,
+            files=[
+                discord.File(io.StringIO(i), 'full.txt')
+                for i in [stdout_formatted, stderr_formatted]
+                if len(i) == 1024
+            ]
+        )
 
     @commands.command()
     async def reloadcfg(self, ctx):
