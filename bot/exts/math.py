@@ -18,6 +18,7 @@ import discord
 from discord.ext import commands
 
 from bot.utils.formatting import codeblock
+import sys
 
 OPERATORS = {
     # ast.BinOp
@@ -399,6 +400,146 @@ class SafeEvaluator(ast.NodeVisitor):
 class Math(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+    @commands.command(aliases=['bf'])
+    async def brainf(self, ctx: commands.Context, *, code: str):
+        eval_time = time.perf_counter()
+        instructions = [i for i in code.split('&')[0] if i in '+-,.<>[]']
+        depth = 0
+        for i in instructions:
+            if i == '[':
+                depth += 1
+            elif i == ']':
+                depth -= 1
+            if depth < 0:
+                break
+
+        if depth != 0:
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa5050,
+                    title='Syntax error!',
+                    description=codeblock(
+                        f'{"".join(instructions)}\n'
+                        f'{"^":>{code.rfind("[" if depth > 0 else "]")+1}}\n'
+                        'Unmatched bracket',
+                        fmt=None
+                    )
+                )
+            )
+            return
+
+        do_wrap = '&wrap' in code
+        instruction_pointer = 0
+        cycle_limit = min(len(instructions) * 2500, 1_000_000)
+        cycles = 0
+        memory = collections.deque([0], maxlen=cycle_limit // 2)
+        cell_pointer = 0
+        output = collections.deque()
+        input_ = collections.deque(map(ord, code[code.find('&input=') + 7:])) if '&input=' in code else []
+        brackets = collections.deque()
+        last_bracket = None
+
+        def run():
+            nonlocal instruction_pointer, memory, cell_pointer, brackets, last_bracket, cycles
+            while instruction_pointer < len(instructions) and cycles < cycle_limit:
+                instr = instructions[instruction_pointer]
+                if instr == '+':
+                    memory[cell_pointer] += 1
+                    if do_wrap and memory[cell_pointer] > 0xff:
+                        memory[cell_pointer] = 0
+                elif instr == '-':
+                    memory[cell_pointer] -= 1
+                    if do_wrap and memory[cell_pointer] < 0:
+                        memory[cell_pointer] = 0xff
+                elif instr == ',':
+                    if input_:
+                        memory[cell_pointer] = input_.popleft()
+                    else:
+                        memory[cell_pointer] = 0
+                elif instr == '.':
+                    output.append(memory[cell_pointer])
+                elif instr == '<':
+                    if cell_pointer > 0:
+                        cell_pointer -= 1
+                elif instr == '>':
+                    cell_pointer += 1
+                    if cell_pointer >= len(memory):
+                        memory.append(0)
+                elif instr == '[':
+                    if memory[cell_pointer] == 0:
+                        depth = 1
+                        while depth:
+                            instruction_pointer += 1
+                            if instructions[instruction_pointer] == '[':
+                                depth += 1
+                            if instructions[instruction_pointer] == ']':
+                                depth -= 1
+                    else:
+                        brackets.append(instruction_pointer)
+                elif instr == ']':
+                    if memory[cell_pointer]:
+                        if brackets:
+                            last_bracket = instruction_pointer = brackets.pop()
+                        else:
+                            instruction_pointer = last_bracket
+                instruction_pointer += 1
+                cycles += 1
+
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            await self.bot.loop.run_in_executor(pool, run)
+
+        if cycles >= cycle_limit:
+            embed = discord.Embed(
+                color=0xfa5050,
+                title='Too many cycles!',
+                description=f'Exited after {cycles} cycles and {(time.perf_counter()-eval_time)*1000:g}ms'
+            )
+        else:
+            embed = discord.Embed(
+                color=0x5050fa,
+                title='',
+                description=f'Operated {cycles} cycles in {(time.perf_counter()-eval_time)*1000:g}ms'
+            )
+
+        embed.add_field(
+            name='Output',
+            inline=False,
+            value=codeblock(''.join(chr(i) if i in range(0x110000) else '\ufffd' for i in output), fmt=None)
+        )
+
+        if '&mem' in code:
+            # |-              A line should fit here              -|
+            # [ Range ] | [   hex cell values   ] [ chrs ]-------| <- accounts 2w chars
+            # 0x00-0x0f | 00 00 00 00 00 00 00 00 ········
+            # ^^^^                    ^^
+            #   index padding (>=4)    cell padding  (>=2)
+            formatted_memory = [
+                f'Pointer -> {hex(cell_pointer)}; {len(memory)} cells ({sys.getsizeof(memory)/1024:g}kb)'
+            ]
+            cell_padding = max(len(hex(max(memory))) - 2, 2) + (min(memory) < 0)
+            index_padding = max(len(hex(len(memory))), 4)
+            grouping = (51 - index_padding * 2) // (cell_padding + 3)
+            lines = itertools.zip_longest(*[iter(memory)] * grouping)
+            for index, row in enumerate(lines):
+                start_index = index * grouping
+                row_length = len(i for i in row if i is not None)
+                row_range = f'{start_index:#0{index_padding}x}-{start_index+row_length:#0{index_padding}x}'
+                row_cells = ' '.join(
+                    f'{i:0{cell_padding}x}' if i is not None else ' ' * cell_padding for i in row
+                )
+                row_chars = ''.join(
+                    chr(i) if i in range(0x110000) and chr(i).isprintable() else '·'
+                    for i in row if i is not None
+                )
+
+                formatted_memory.append(f'{row_range} | {row_cells} {row_chars}')
+                if index > 50:
+                    break
+
+            embed.add_field(name='Memory', inline=False, value=codeblock('\n'.join(formatted_memory)))
+
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def functions(self, ctx: commands.Context):

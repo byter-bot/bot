@@ -35,6 +35,10 @@ class Fun(commands.Cog):
                     await message.add_reaction(reaction)
                     break
 
+    @commands.command(hidden=True)
+    async def ban(self, ctx: commands.Context, *, whom: str):
+        await ctx.send(f'Banned {whom} :white_check_mark:', allowed_mentions=discord.AllowedMentions.none())
+
     @commands.command()
     async def cat(self, ctx: commands.Context):
         """cat"""
