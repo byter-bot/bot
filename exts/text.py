@@ -1,7 +1,9 @@
 import base64
 import hashlib
 import io
+import re
 import textwrap
+import time
 import typing
 import unicodedata
 
@@ -171,6 +173,7 @@ class Text(commands.Cog):
 
     @commands.command(aliases=['mono'])
     async def fullwidth(self, ctx, *, text: str):
+        """ｗｉｄｅ"""
         # Translate ascii -> fullwidth by adding 0xfee0, but use U+3000 for spaces
         translation_table = dict(zip(range(0x21, 0x7e), range(0xff01, 0xff5e)))
         translation_table.update({0x21: 0x3000})
@@ -181,6 +184,71 @@ class Text(commands.Cog):
                 title='Full-width text',
                 description=fullwidth_text
             )
+        )
+
+    @commands.command(aliases=['re'])
+    async def regex(self, ctx, pattern, *, text):
+        """Match regex pattern against text"""
+        init_time = time.perf_counter()
+        if text is None:
+            if ctx.message.reference is None:
+                raise commands.BadArgument('text was omitted but there is no reply')
+
+            text = (await ctx.fetch_message(ctx.message.reference.message_id)).content
+
+        match = re.search(pattern.strip('`'), text)
+        if match:
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0x5050fa,
+                    title='Regex match',
+                    description=(
+                        f'Full match ({match.end() - match.start()}): `{match.group(0)}`\n'
+                        f'Groups: `{match.groups()}`'
+                    )
+                ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
+            )
+
+        else:
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa7050,
+                    title='No matches!'
+                )
+            )
+
+    @commands.command(aliases=['sre'])
+    async def sregex(self, ctx, pattern, replacement, *, text: typing.Optional[str]):
+        """Regex replacement"""
+        init_time = time.perf_counter()
+        if text is None:
+            if ctx.message.reference is None:
+                raise commands.BadArgument('text was omitted but there is no reply')
+
+            text = (await ctx.fetch_message(ctx.message.reference.message_id)).content
+
+        try:
+            repl, num = re.subn(pattern.strip('`'), replacement.strip('`'), text)
+
+        except re.error as exc:
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa5050,
+                    title='Regex error!',
+                    description=str(exc)
+                )
+            )
+            return
+
+        await ctx.send(
+            embed=discord.Embed(
+                color=0x5050fa,
+                title='Regex repl',
+                description=(
+                    f'Result: `{repl}`\n'
+                    f'Replacements: {num}'
+                )
+            ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
         )
 
 
