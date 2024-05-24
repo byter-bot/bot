@@ -1,11 +1,11 @@
-import fuzzywuzzy.process
-import fuzzywuzzy.fuzz
 import hashlib
 import io
 import json
 import re
 import traceback
 
+import fuzzywuzzy.fuzz
+import fuzzywuzzy.process
 import discord
 from discord.ext import commands, tasks
 
@@ -22,7 +22,9 @@ class ErrorHandler(commands.Cog):
                 scorer=fuzzywuzzy.fuzz.WRatio, score_cutoff=70
             )
             if suggestion:
-                await ctx.send(f'Command {ctx.invoked_with} not found, did you mean {suggestion[0]}?')
+                await ctx.send(
+                    f'Command {ctx.invoked_with} not found, did you mean {suggestion[0]}?'
+                )
 
         elif isinstance(error, commands.ConversionError):
             await ctx.send(error)
@@ -96,7 +98,9 @@ class ErrorHandler(commands.Cog):
             }
 
             if hasattr(error, 'original'):
-                dump_obj['traceback'] = traceback.format_exception(type(error), error, error.__traceback__)
+                dump_obj['traceback'] = traceback.format_exception(
+                    type(error), error, error.__traceback__
+                )
 
             await self.bot.get_channel(845464282338295808).send(
                 f"{hashlib.md5(ctx.author.id.to_bytes(10,'big')).hexdigest()}:"
