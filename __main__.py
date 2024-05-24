@@ -1,28 +1,12 @@
 import json
 import traceback
-from collections import namedtuple
 from pathlib import Path
 
-import aiohttp
 import discord
 from discord.ext import commands
 
-CFG_DEFAULTS = {
-    "prefix": [],
-    "reactions": {},
-    "case_insensitive": True,
-    "intents": {
-        "guilds": True,
-        "guild_messages": True,
-        "guild_reactions": True
-    }
-}
 
-# Create an namedtuple object with CFG_DEFAULTS and config.json, which lets us access
-# values using their name as properties
-_cfg = CFG_DEFAULTS
-_cfg.update(json.load(open('config.json')))
-CFG = namedtuple('Config', CFG_DEFAULTS)(**_cfg)
+CFG = json.load(open('config_defaults.json')) | json.load(open('config.json'))
 
 class ByterBot(commands.Bot):
     def __init__(self):
@@ -30,12 +14,12 @@ class ByterBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions(
                 everyone=False, users=True, roles=False, replied_user=True
             ),
-            command_prefix=commands.when_mentioned_or(*CFG.prefix),
-            case_insensitive=CFG.case_insensitive,
-            intents=discord.Intents(**CFG.intents)
+            command_prefix=commands.when_mentioned_or(*CFG['prefix']),
+            case_insensitive=True,
+            intents=discord.Intents(**CFG['intents'])
         )
 
-        self.session = None
+        self.config = CFG
 
         # Try to load all extensions on exts, ignore files without a
         # setup entry point func and print other errors
@@ -48,12 +32,6 @@ class ByterBot(commands.Bot):
 
             except commands.ExtensionError:
                 traceback.print_exc()
-
-    async def on_ready(self):
-        self.session = aiohttp.ClientSession(loop=self.loop)
-
-    async def on_disconnect(self):
-        await self.session.close()
 
 
 bot = ByterBot()
