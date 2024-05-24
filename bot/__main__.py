@@ -1,9 +1,12 @@
 import json
+import pkgutil
 import traceback
 from pathlib import Path
 
 import discord
 from discord.ext import commands
+
+from bot import exts
 
 
 CFG = json.load(open('config_defaults.json')) | json.load(open('config.json'))
@@ -20,18 +23,11 @@ class ByterBot(commands.Bot):
         )
 
         self.config = CFG
+        def _imp_err(name):
+            raise ImportError(name=name)
 
-        # Try to load all extensions on exts, ignore files without a
-        # setup entry point func and print other errors
-        for ext in Path('exts').glob('*.py'):
-            try:
-                self.load_extension(str(ext)[:-3].replace('/', '.'))
-
-            except commands.NoEntryPointError:
-                pass
-
-            except commands.ExtensionError:
-                traceback.print_exc()
+        for module in pkgutil.walk_packages(exts.__path__, exts.__name__ + '.', onerror=_imp_err):
+            self.load_extension(module.name)
 
 
 bot = ByterBot()
