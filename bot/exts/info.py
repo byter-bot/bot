@@ -90,7 +90,7 @@ class Info(commands.Cog):
 
     @commands.command(aliases=['?', 'whois'])
     @commands.cooldown(3, 10)
-    async def whatis(self, ctx, obj_id: int):
+    async def whatis(self, ctx, obj_id):
         """Tries to fetch & gather info about an ID or object"""
         obj_id = int(''.join(i for i in obj_id if i.isdecimal()))
         with contextlib.suppress(discord.NotFound):
