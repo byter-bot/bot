@@ -32,7 +32,8 @@ OPERATORS = {
     ast.RShift: operator.rshift,
     ast.BitOr: operator.or_,
     ast.BitXor: operator.xor,
-    ast.And: operator.and_,
+    ast.BitAnd: operator.and_,
+    ast.FloorDiv: operator.floordiv,
 
     # ast.UnaryOp
     ast.Invert: operator.invert,
@@ -73,34 +74,34 @@ class Number(decimal.Decimal):
         return str(self)
 
     def __lshift__(self, other):
-        return Number(int(self) << other)
+        return Number(int(self) << int(other))
 
     def __rshift__(self, other):
-        return Number(int(self) >> other)
+        return Number(int(self) >> int(other))
 
     def __rlshift__(self, other):
-        return Number(int(other) << self)
+        return Number(int(other) << int(self))
 
     def __rrshift__(self, other):
-        return Number(int(other) >> self)
+        return Number(int(other) >> int(self))
 
     def __and__(self, other):
-        return Number(int(self) & other)
+        return Number(int(self) & int(other))
 
     def __xor__(self, other):
-        return Number(int(self) ^ other)
+        return Number(int(self) ^ int(other))
 
     def __or__(self, other):
-        return Number(int(self) | other)
+        return Number(int(self) | int(other))
 
     def __rand__(self, other):
-        return Number(int(other) & self)
+        return Number(int(other) & int(self))
 
     def __rxor__(self, other):
-        return Number(int(other) ^ self)
+        return Number(int(other) ^ int(self))
 
     def __ror__(self, other):
-        return Number(int(other) | self)
+        return Number(int(other) | int(self))
 
     def __index__(self):
         return int(self)
@@ -210,6 +211,7 @@ class EvalLib(collections.abc.Mapping):
                 'degrees': math.degrees,
                 'distance': math.dist,
                 'exp': math.exp,
+                'floor': math.floor,
                 'hypotenuse': math.hypot,
                 'log': math.log,
                 'log2': math.log2,
