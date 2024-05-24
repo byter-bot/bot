@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import io
 import textwrap
@@ -109,5 +110,51 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
             if code_return is not None:
                 self._last_eval_value = code_return
 
+    @commands.command(aliases=['h'])
+    async def shell(self, ctx, *, command):
+        command = '\n'.join(command.splitlines()[1:-1]) \
+                    if command.startswith('```') \
+                    else command.strip('` ')
+
+        exec_time = time.perf_counter()
+        proc = await asyncio.subprocess \
+                .create_subprocess_shell(
+                    command,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
+
+        stdout, stderr = await proc.communicate()
+        stdout_formatted = format_codeblock(stdout.decode())
+        stderr_formatted = format_codeblock(stderr.decode())
+        if proc.returncode == 0:
+            embed = discord.Embed(
+                color=0x50fa50,
+                title=':white_check_mark: Subprocess finished',
+                description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
+            )
+
+        else:
+            embed = discord.Embed(
+                color=0xfa7050,
+                title=f':x: Subprocess exited with returncode {proc.returncode}',
+                description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
+            )
+
+        if stdout_formatted == stderr_formatted == None:
+            embed.description = 'no output · ' + embed.description
+
+        if stdout_formatted is not None:
+            embed.add_field(name='Stdout:', value=stdout_formatted, inline=False)
+
+        if stderr_formatted is not None:
+            embed.add_field(name='Stderr:', value=stderr_formatted, inline=False)
+
+
+        await ctx.send(embed=embed, files=get_files(stdout.decode(), stderr.decode()))
+
+
+
 def setup(bot):
     bot.add_cog(Admin(bot))
+
