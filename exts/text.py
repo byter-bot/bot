@@ -198,7 +198,19 @@ class Text(commands.Cog):
 
             text = (await ctx.fetch_message(ctx.message.reference.message_id)).content
 
-        match = re.search(pattern.strip('`'), text)
+        try:
+            match = re.search(pattern.strip('`'), text)
+
+        except re.error as exc:
+            await ctx.send(
+                embed=discord.Embed(
+                    color=0xfa5050,
+                    title='Regex error!',
+                    description=str(exc)
+                )
+            )
+            return
+
         if match:
             await ctx.send(
                 embed=discord.Embed(
@@ -216,7 +228,7 @@ class Text(commands.Cog):
                 embed=discord.Embed(
                     color=0xfa7050,
                     title='No matches!'
-                )
+                ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
             )
 
     @commands.command(aliases=['sre'])
@@ -309,8 +321,8 @@ class Text(commands.Cog):
             await ctx.send(
                 f'```{output}```'
                 f'`{image.size[0]}x{image.size[1]}`\n'
-                f'processed in {(time.perf_counter()-load_time)*1000:.0f}ms\n'
                 f'loaded in {(load_time-init_time)*1000:.0f}ms\n'
+                f'processed in {(time.perf_counter()-load_time)*1000:.0f}ms\n'
             )
 
         else:
