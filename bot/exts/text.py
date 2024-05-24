@@ -80,16 +80,19 @@ class Text(commands.Cog):
         """Gives info about a unicode character
 
         Char can be a single character, an hex number, or the *full* character name"""
-        if len(char) > 1:
+        if 1 < len(char) < 7:
             try:
-                char = chr(int(char.strip('uU+'), base=16))
+                char = chr(int(char.lstrip('uU+'), base=16))
 
             except ValueError:
-                try:
-                    char = unicodedata.lookup(char)
+                pass
 
-                except KeyError:
-                    raise commands.BadArgument('Invalid unicode point')
+        if len(char) > 1:
+            try:
+                char = unicodedata.lookup(char)
+
+            except KeyError:
+                raise commands.BadArgument('Invalid unicode point or query')
 
         try:
             category = unicodedata.category(char)
