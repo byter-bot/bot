@@ -1,9 +1,9 @@
-import aiohttp
 import html
 import re
 import typing
 import urllib.parse
 
+import aiohttp
 import discord
 from discord.ext import commands
 

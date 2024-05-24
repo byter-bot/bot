@@ -5,9 +5,9 @@ import json
 import re
 import traceback
 
+import discord
 import fuzzywuzzy.fuzz
 import fuzzywuzzy.process
-import discord
 from discord.ext import commands, tasks
 
 
