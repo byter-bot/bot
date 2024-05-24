@@ -63,11 +63,7 @@ class Web(commands.Cog):
                 f' [link](https://wikipedia.org/wiki/{urllib.parse.quote(data_parsed[0]["title"])})'
             )
 
-            embed = discord.Embed(
-                color=0x5050fa,
-                title=data_parsed[0]['title'],
-                description=description
-            )
+            embed = discord.Embed(color=0x5050fa, title=data_parsed[0]['title'], description=description)
 
             embed.set_footer(
                 text='from wikipedia.org | 🄯 CC BY-SA 3.0',
@@ -82,12 +78,11 @@ class Web(commands.Cog):
                     name='Other results',
                     value='\n'.join(
                         textwrap.shorten(
-                            '[**{}**](https://wikipedia.org/wiki/{}) ─ {}'.format(
-                                i['title'], urllib.parse.quote(i['title']), i['extract']
-                            ),
-                            width=180, placeholder='…'
-                        )
-                        for i in data_parsed[1:]
+                            '[**{}**](https://wikipedia.org/wiki/{}) ─ {}'
+                            .format(i['title'], urllib.parse.quote(i['title']), i['extract']),
+                            width=180,
+                            placeholder='…'
+                        ) for i in data_parsed[1:]
                     ),
                     inline=False
                 )

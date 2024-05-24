@@ -10,7 +10,6 @@ import fuzzywuzzy.fuzz
 import fuzzywuzzy.process
 from discord.ext import commands, tasks
 
-
 MESSAGE_UNCAUGHT_ERROR = """An uncaught error occurred while processing your command!
 `{}`
 
@@ -49,13 +48,10 @@ class ErrorHandler(commands.Cog):
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandNotFound):
             suggestion = fuzzywuzzy.process.extractOne(
-                ctx.invoked_with, self.bot.commands,
-                scorer=fuzzywuzzy.fuzz.WRatio, score_cutoff=70
+                ctx.invoked_with, self.bot.commands, scorer=fuzzywuzzy.fuzz.WRatio, score_cutoff=70
             )
             if suggestion:
-                await ctx.send(
-                    f'Command {ctx.invoked_with} not found, did you mean {suggestion[0]}?'
-                )
+                await ctx.send(f'Command {ctx.invoked_with} not found, did you mean {suggestion[0]}?')
 
         elif isinstance(error, commands.ConversionError):
             await ctx.send(error)
@@ -63,26 +59,19 @@ class ErrorHandler(commands.Cog):
         elif isinstance(error, commands.UserInputError):
             formatted_error = re.sub(
                 # Error Name ('error message') -> Error name: error message
-                r" \(['\"](.*)['\"]\)", r': \1',
+                r" \(['\"](.*)['\"]\)",
+                r': \1',
                 # split PascalCase
                 re.sub(r'([A-Z][a-z]+)', r'\1 ', repr(error))
             ).capitalize().strip('.')
 
             await ctx.send(
-                embed=discord.Embed(
-                    color=0xfa5050,
-                    title=':x: Input error!',
-                    description=formatted_error
-                )
+                embed=discord.Embed(color=0xfa5050, title=':x: Input error!', description=formatted_error)
             )
 
         elif isinstance(error, commands.CheckFailure):
             await ctx.send(
-                embed=discord.Embed(
-                    color=0xfa5050,
-                    title=':x: Check failed!',
-                    description=f'{error}'
-                )
+                embed=discord.Embed(color=0xfa5050, title=':x: Check failed!', description=f'{error}')
             )
 
         elif isinstance(error, commands.DisabledCommand):
@@ -119,8 +108,7 @@ class ErrorHandler(commands.Cog):
                 formatted_error = formatted_error[:80] + '…'
 
             embed = discord.Embed(
-                color=0xfa5050, title='Uh oh..',
-                description=MESSAGE_UNCAUGHT_ERROR.format(formatted_error)
+                color=0xfa5050, title='Uh oh..', description=MESSAGE_UNCAUGHT_ERROR.format(formatted_error)
             )
 
             embed.set_thumbnail(url=ASSET_CRASH)
@@ -142,15 +130,14 @@ class ErrorHandler(commands.Cog):
                     "repr": repr(error),
                     "attrs": {
                         attr: repr(getattr(error, attr))
-                        for attr in dir(error) if not callable(getattr(error, attr))
+                        for attr in dir(error)
+                        if not callable(getattr(error, attr))
                     }
                 }
             }
 
             if hasattr(error, 'original'):
-                dump_obj['traceback'] = traceback.format_exception(
-                    type(error), error, error.__traceback__
-                )
+                dump_obj['traceback'] = traceback.format_exception(type(error), error, error.__traceback__)
 
             if self.error_log_channel:
                 await self.bot.get_channel(self.error_log_channel).send(

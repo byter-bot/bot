@@ -43,12 +43,7 @@ class Fun(commands.Cog):
             if resp.ok:
                 json = await resp.json()
                 url = json[0]['url']
-                await ctx.send(
-                    embed=discord.Embed(
-                        color=0x5050fa,
-                        title='Cat!!'
-                    ).set_image(url=url)
-                )
+                await ctx.send(embed=discord.Embed(color=0x5050fa, title='Cat!!').set_image(url=url))
 
             else:
                 await ctx.send("Couldn't get a cat image <:creustickersad:726924232461910077>")
@@ -66,7 +61,7 @@ class Fun(commands.Cog):
             """Move cells left. 0 2 0 2 -> 2 2 0 0"""
             for index, cell, n_cell in zip(range(len(line)), line[:-1], line[1:]):
                 if cell == 0 and n_cell > 0:  # Swap cells if valid and skip to next iteration
-                    line[index:index+2] = (n_cell, 0)
+                    line[index:index + 2] = (n_cell, 0)
                     break
             else:
                 return line
@@ -77,8 +72,8 @@ class Fun(commands.Cog):
             line = comp(line)
             for index, cell, n_cell in zip(range(len(line)), line[:-1], line[1:]):
                 if cell != 0 and cell == n_cell:
-                    line[index:index+2] = (cell + 1, 0)
-                    score += 2 ** (cell + 1)
+                    line[index:index + 2] = (cell + 1, 0)
+                    score += 2**(cell + 1)
             return comp(line), score
 
         def merge_lines(board, direction, score):
@@ -129,8 +124,7 @@ class Fun(commands.Cog):
                     reaction, _ = await self.bot.wait_for(
                         'reaction_add',
                         timeout=120,
-                        check=lambda r, u:
-                            u == ctx.author and r.message == game and str(r) in ARROW_EMOTES
+                        check=lambda r, u: u == ctx.author and r.message == game and str(r) in ARROW_EMOTES
                     )
 
                     await reaction.remove(ctx.author)
@@ -141,10 +135,7 @@ class Fun(commands.Cog):
                                 color=0xfafa60,
                                 title='Game ended!',
                                 description='\n'.join(''.join(tiles[j] for j in i) for i in board)
-                            ).add_field(
-                                name='\u200c',
-                                value=f'**Score:** {score}\n**Moves:** {move_count}'
-                            )
+                            ).add_field(name='\u200c', value=f'**Score:** {score}\n**Moves:** {move_count}')
                         )
                         return
 

@@ -22,9 +22,7 @@ class Text(commands.Cog):
         encoded = ' '.join(f'{ord(i):0>8b}' for i in text)
         await ctx.send(
             embed=discord.Embed(
-                color=0x50fa50,
-                title='Encoded binary text',
-                description=codeblock(encoded, fmt='c')
+                color=0x50fa50, title='Encoded binary text', description=codeblock(encoded, fmt='c')
             ),
             file=discord.File(io.StringIO(encoded), 'trunc.txt') if len(encoded) > 1015 else None
         )
@@ -33,13 +31,11 @@ class Text(commands.Cog):
     async def binarydecode(self, ctx: commands.Context, *, text: str):
         """Decodes given binary text"""
         text = [i for i in text if i in '01']
-        decoded = [text[i:i+8] for i in range(0, len(text), 8)]
+        decoded = [text[i:i + 8] for i in range(0, len(text), 8)]
         decoded = ''.join(chr(int(''.join(i), base=2)) for i in decoded)
         await ctx.send(
             embed=discord.Embed(
-                color=0x50fa50,
-                title='Decoded binary text',
-                description=codeblock(decoded, fmt=None)
+                color=0x50fa50, title='Decoded binary text', description=codeblock(decoded, fmt=None)
             ),
             file=discord.File(io.StringIO(decoded), 'trunc.txt') if len(decoded) > 1016 else None
         )
@@ -50,9 +46,7 @@ class Text(commands.Cog):
         encoded = base64.b64encode(text.encode()).decode(errors='replace')
         await ctx.send(
             embed=discord.Embed(
-                color=0x5050fa,
-                title='Encoded base64 text',
-                description=codeblock(encoded, fmt=None)
+                color=0x5050fa, title='Encoded base64 text', description=codeblock(encoded, fmt=None)
             ),
             file=discord.File(io.StringIO(encoded), 'trunc.txt') if len(encoded) > 1016 else None
         )
@@ -68,9 +62,7 @@ class Text(commands.Cog):
 
         await ctx.send(
             embed=discord.Embed(
-                color=0x5050fa,
-                title='Decoded base64 text',
-                description=codeblock(decoded, fmt=None)
+                color=0x5050fa, title='Decoded base64 text', description=codeblock(decoded, fmt=None)
             ),
             file=discord.File(io.StringIO(decoded), 'trunc.txt') if len(decoded) > 1016 else None
         )
@@ -121,8 +113,7 @@ class Text(commands.Cog):
                     color=0x5050fa,
                     title='Available hash algorithms:',
                     description=', '.join(
-                        f'`{i}`' for i in hashlib.algorithms_available
-                        if not i.startswith('shake')
+                        f'`{i}`' for i in hashlib.algorithms_available if not i.startswith('shake')
                     )
                 )
             )
@@ -155,11 +146,7 @@ class Text(commands.Cog):
         translation_table.update({0x20: 0x3000})
         fullwidth_text = text.translate(translation_table)
         await ctx.send(
-            embed=discord.Embed(
-                color=0x5050fa,
-                title='Full-width text',
-                description=fullwidth_text
-            )
+            embed=discord.Embed(color=0x5050fa, title='Full-width text', description=fullwidth_text)
         )
 
     @commands.command(aliases=['re'])
@@ -176,13 +163,7 @@ class Text(commands.Cog):
             match = re.search(pattern.strip('`'), text)
 
         except re.error as exc:
-            await ctx.send(
-                embed=discord.Embed(
-                    color=0xfa5050,
-                    title='Regex error!',
-                    description=str(exc)
-                )
-            )
+            await ctx.send(embed=discord.Embed(color=0xfa5050, title='Regex error!', description=str(exc)))
             return
 
         if match:
@@ -199,10 +180,9 @@ class Text(commands.Cog):
 
         else:
             await ctx.send(
-                embed=discord.Embed(
-                    color=0xfa7050,
-                    title='No matches!'
-                ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
+                embed=discord.Embed(color=0xfa7050, title='No matches!').set_footer(
+                    text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms'
+                )
             )
 
     @commands.command(aliases=['sre'])
@@ -219,23 +199,15 @@ class Text(commands.Cog):
             repl, num = re.subn(pattern.strip('`'), replacement.strip('`'), text)
 
         except re.error as exc:
-            await ctx.send(
-                embed=discord.Embed(
-                    color=0xfa5050,
-                    title='Regex error!',
-                    description=str(exc)
-                )
-            )
+            await ctx.send(embed=discord.Embed(color=0xfa5050, title='Regex error!', description=str(exc)))
             return
 
         await ctx.send(
             embed=discord.Embed(
                 color=0x5050fa,
                 title='Regex repl',
-                description=(
-                    f'Result: `{repl}`\n'
-                    f'Replacements: {num}'
-                )
+                description=(f'Result: `{repl}`\n'
+                             f'Replacements: {num}')
             ).set_footer(text=f'processed in {(time.perf_counter()-init_time)*1000:.5f}ms')
         )
 
@@ -262,23 +234,18 @@ class Text(commands.Cog):
         except PIL.UnidentifiedImageError:
             raise commands.BadArgument('invalid image')
 
-        if image.size[1]/(image.size[0]/width)//1.8 >= 320:
+        if image.size[1] / (image.size[0] / width) // 1.8 >= 320:
             raise commands.UserInputError('file height is too high!')
 
         # Make alpha bg black, resize image and convert to greyscale
-        image = Image.alpha_composite(
-            Image.new('RGBA', image.size, (0, 0, 0)),
-            image.convert(mode='RGBA')
-        )
-        image = image.resize((width, int((image.size[1]/(image.size[0]/width))//1.8)))
+        image = Image.alpha_composite(Image.new('RGBA', image.size, (0, 0, 0)), image.convert(mode='RGBA'))
+        image = image.resize((width, int((image.size[1] / (image.size[0] / width)) // 1.8)))
         image = image.convert(mode='L')
 
         # Iter through entire image and create the resulting text with unicode block elements
         output = [
-            ''.join(
-                ' ░░▒▒▓▓█'[image.getpixel((x, y))//32]
-                for x in range(image.size[0])
-            )
+            ''.join(' ░░▒▒▓▓█'[image.getpixel((x, y)) // 32]
+                    for x in range(image.size[0]))
             for y in range(image.size[1])
         ]
 

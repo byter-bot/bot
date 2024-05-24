@@ -71,13 +71,10 @@ class Events(commands.Cog, command_attrs={'hidden': True}):
 
         content = io.StringIO(
             '\n'.join([
-                f'Remaining ({len(questions)}):',
-                *(
+                f'Remaining ({len(questions)}):', *(
                     f'From: {author} ({author.id})\n{question}\nUrl: {msg.jump_url}\n'
                     for author, question, msg in questions
-                ),
-                f'Seen ({len(seen)}):',
-                *(
+                ), f'Seen ({len(seen)}):', *(
                     f'From: {author} ({author.id})\n{question}\nUrl: {msg.jump_url}\n'
                     for author, question, msg in seen
                 )
@@ -88,8 +85,7 @@ class Events(commands.Cog, command_attrs={'hidden': True}):
 
     @commands.command(aliases=['qapick'])
     @commands.check_any(
-        commands.is_owner(),
-        commands.has_any_role('Créu Chief', 'Créu Curator', 'Créu Captain')
+        commands.is_owner(), commands.has_any_role('Créu Chief', 'Créu Curator', 'Créu Captain')
     )
     async def qpick(self, ctx: commands.Context):
         if self.qa_session.is_closed:
