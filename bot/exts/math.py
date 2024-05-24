@@ -523,7 +523,7 @@ class Math(commands.Cog):
             lines = itertools.zip_longest(*[iter(memory)] * grouping)
             for index, row in enumerate(lines):
                 start_index = index * grouping
-                row_length = len(i for i in row if i is not None)
+                row_length = len([i for i in row if i is not None])
                 row_range = f'{start_index:#0{index_padding}x}-{start_index+row_length:#0{index_padding}x}'
                 row_cells = ' '.join(
                     f'{i:0{cell_padding}x}' if i is not None else ' ' * cell_padding for i in row
