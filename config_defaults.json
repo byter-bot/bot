@@ -7,5 +7,11 @@
         "guild_reactions": true
     },
     "main_guild_id": 0,
-    "error_channel_id": 0
+    "error_channel_id": 0,
+    "minigame_emoji": {
+        "2048": [
+            ":white_large_square:", ":zero:", ":one:", ":two:", ":three:", ":four:", ":five:",
+            ":six:", ":seven:", ":eight:", ":nine:", ":keycap_ten:", ":record_button:"
+        ]
+    }
 }
