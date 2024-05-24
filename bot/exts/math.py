@@ -60,8 +60,8 @@ class Number(decimal.Decimal):
         to_wrap = [
             '__add__', '__sub__', '__mul__', '__truediv__', '__floordiv__', '__mod__', '__divmod__',
             '__pow__', '__radd__', '__rsub__', '__rmul__', '__rtruediv__', '__rfloordiv__', '__rmod__',
-            '__rdivmod__', '__rpow__', '__neg__', '__pos__', '__abs__', '__int__', '__round__', '__trunc__',
-            '__floor__', '__ceil__'
+            '__rdivmod__', '__rpow__', '__neg__', '__pos__', '__abs__', '__round__', '__trunc__', '__floor__',
+            '__ceil__'
         ]
 
         for method in to_wrap:
@@ -78,6 +78,12 @@ class Number(decimal.Decimal):
     def __rshift__(self, other):
         return Number(int(self) >> other)
 
+    def __rlshift__(self, other):
+        return Number(int(other) << self)
+
+    def __rrshift__(self, other):
+        return Number(int(other) >> self)
+
     def __and__(self, other):
         return Number(int(self) & other)
 
@@ -86,6 +92,18 @@ class Number(decimal.Decimal):
 
     def __or__(self, other):
         return Number(int(self) | other)
+
+    def __rand__(self, other):
+        return Number(int(other) & self)
+
+    def __rxor__(self, other):
+        return Number(int(other) ^ self)
+
+    def __ror__(self, other):
+        return Number(int(other) | self)
+
+    def __index__(self):
+        return int(self)
 
 
 class Boolean(Number):
@@ -116,12 +134,19 @@ undefined = Undefined()
 class EvalFunction:
     def __new__(cls, function: callable):
         self = object.__new__(cls)
-        self.__doc__ = function.__doc__
+        functools.update_wrapper(self, function)
         self.func = function
         return self
 
     def __call__(self, *args, **kwargs) -> Any:
-        return self.func(*args, **kwargs)
+        res = self.func(*args, **kwargs)
+        if isinstance(res, (Number, Boolean)):
+            return res
+        if isinstance(res, bool):
+            return Boolean(res)
+        if isinstance(res, numbers.Number):
+            return Number(str(res))
+        return res
 
     def __repr__(self):
         return f'<built-in function {self.func.__name__}>'
@@ -147,66 +172,65 @@ class EvalLib(collections.abc.Mapping):
     def __new__(cls):
         self = object.__new__(cls)
 
-        self.functions = {
-            # Built-ins
-            'absolute': abs,
-            'all': all,
-            'any': any,
-            'binary': bin,
-            'boolean': Boolean,
-            'character': chr,
-            'dictionary': dict,
-            'enumerate': enumerate,
-            'filter': filter,
-            'hexadecimal': hex,
-            'length': len,
-            'list': list,
-            'map': map,
-            'max': max,
-            'min': min,
-            'number': Number,
-            'octal': oct,
-            'range': range,
-            'round': round,
-            'string': str,
-            'zip': zip,
+        self.functions = FrozenMapping({
+            i: EvalFunction(j) for i, j in {
+                # Built-ins
+                'absolute': abs,
+                'all': all,
+                'any': any,
+                'binary': bin,
+                'boolean': Boolean,
+                'character': chr,
+                'dictionary': dict,
+                'enumerate': enumerate,
+                'filter': filter,
+                'hexadecimal': hex,
+                'length': len,
+                'list': list,
+                'map': map,
+                'max': max,
+                'min': min,
+                'number': Number,
+                'octal': oct,
+                'range': range,
+                'round': round,
+                'string': str,
+                'zip': zip,
 
-            # Math module
-            'arccos': math.acos,
-            'arccosh': math.acosh,
-            'arcsin': math.asin,
-            'arcsinh': math.asinh,
-            'arctan': math.atan,
-            'arctanh': math.atanh,
-            'ceiling': math.ceil,
-            'cos': math.cos,
-            'cosh': math.cosh,
-            'degrees': math.degrees,
-            'distance': math.dist,
-            'exp': math.exp,
-            'gcd': math.gcd,
-            'hypotenuse': math.hypot,
-            'lcm': math.lcm,
-            'log': math.log,
-            'log2': math.log2,
-            'log10': math.log10,
-            'product': math.prod,
-            'radians': math.radians,
-            'sin': math.sin,
-            'sinh': math.sinh,
-            'sqrt': math.sqrt,
-            'tan': math.tan,
-            'tanh': math.tanh
-        }
-        self.constants = {
+                # Math module
+                'arccos': math.acos,
+                'arccosh': math.acosh,
+                'arcsin': math.asin,
+                'arcsinh': math.asinh,
+                'arctan': math.atan,
+                'arctanh': math.atanh,
+                'ceiling': math.ceil,
+                'cos': math.cos,
+                'cosh': math.cosh,
+                'degrees': math.degrees,
+                'distance': math.dist,
+                'exp': math.exp,
+                'hypotenuse': math.hypot,
+                'log': math.log,
+                'log2': math.log2,
+                'log10': math.log10,
+                'radians': math.radians,
+                'sin': math.sin,
+                'sinh': math.sinh,
+                'sqrt': math.sqrt,
+                'tan': math.tan,
+                'tanh': math.tanh
+            }.items()
+        })
+        self.constants = FrozenMapping({
             'euler': Number(str(math.e)),
             'pi': Number(str(math.pi)),
             'tau': Number(str(math.tau)),
             'infinity': Number('inf'),
             'nan': Number('nan'),
             'undefined': undefined
-        }
-        self.aliases = {
+        })
+        self.aliases = FrozenMapping({
             'abs': 'absolute',
             'bin': 'binary',
             'bool': 'boolean',
@@ -238,11 +262,7 @@ class EvalLib(collections.abc.Mapping):
             'e': 'euler',
             'inf': 'infinity',
             'undef': 'undefined'
-        }
-
-        self.functions = FrozenMapping({i: EvalFunction(j) for i, j in self.functions.items()})
-        self.constants = FrozenMapping(self.constants)
-        self.aliases = FrozenMapping(self.aliases)
+        })
 
         return self
 
@@ -329,8 +349,8 @@ class SafeEvaluator(ast.NodeVisitor):
     def visit_List(self, node: ast.List) -> list[Any]:
         return list(map(self.visit, node.elts))
 
-    def visit_ListComp(self, node: ast.ListComp) -> list[Any]:
-        return list()
+    def visit_Tuple(self, node: ast.Tuple) -> tuple[Any]:
+        return tuple(map(self.visit, node.elts))
 
 
 class Math(commands.Cog):
