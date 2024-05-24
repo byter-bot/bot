@@ -74,7 +74,7 @@ class Text(commands.Cog):
     @commands.command(aliases=['base64', 'b64'])
     async def base64encode(self, ctx, *, text: str):
         """Encodes given text to base64"""
-        encoded = base64.b64encode(text.encode()).decode()
+        encoded = base64.b64encode(text.encode()).decode(errors='replace')
         out, trunc = codeblock_and_trunc(encoded)
         await ctx.send(
             embed=discord.Embed(
@@ -89,7 +89,7 @@ class Text(commands.Cog):
     async def base64decode(self, ctx, *, text: str):
         """Decodes given base64 text"""
         try:
-            decoded = base64.b64decode(text.encode(), validate=True).decode()
+            decoded = base64.b64decode(text.encode(), validate=True).decode(errors='replace')
 
         except base64.binascii.Error:
             raise commands.UserInputError('invalid base64 code given')
