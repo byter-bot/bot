@@ -49,12 +49,6 @@ class ByterBot(commands.Bot):
             except commands.ExtensionError:
                 traceback.print_exc()
 
-    async def on_ready(self):
-        self.session = aiohttp.ClientSession(loop=self.loop)
-
-    async def on_disconnect(self):
-        await self.session.close()
-
 
 bot = ByterBot()
 bot.run(open('TOKEN').read())

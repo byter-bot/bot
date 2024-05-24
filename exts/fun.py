@@ -1,3 +1,4 @@
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -5,11 +6,12 @@ from discord.ext import commands
 class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.session = aiohttp.ClientSession(loop=bot.loop)
 
     @commands.command()
     async def cat(self, ctx):
         """cat"""
-        resp = await self.bot.session.get("https://api.thecatapi.com/v1/images/search")
+        resp = await self.session.get("https://api.thecatapi.com/v1/images/search")
         if resp.ok:
             json = await resp.json()
             url = json[0]['url']
