@@ -25,7 +25,7 @@ ASSET_CRASH = (
 
 
 class ErrorHandler(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.error_log_channel = bot.config['error_channel_id']
         self.clean_logs.start()
@@ -46,7 +46,7 @@ class ErrorHandler(commands.Cog):
             self.clean_logs.cancel()
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandNotFound):
             suggestion = fuzzywuzzy.process.extractOne(
                 ctx.invoked_with, self.bot.commands,

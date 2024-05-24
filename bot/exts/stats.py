@@ -8,7 +8,7 @@ from discord.ext import commands, tasks
 
 
 class Stats(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.commands_completed = 0
         self.commands_errored = 0
@@ -70,7 +70,7 @@ class Stats(commands.Cog):
         self.commands_errored += 1
 
     @commands.command()
-    async def stats(self, ctx):
+    async def stats(self, ctx: commands.Context):
         embed = discord.Embed(color=0x5070fa, title='Stats:')
         virt_mem = psutil.virtual_memory()
         sys_uptime = datetime.timedelta(seconds=time.time()-psutil.boot_time())

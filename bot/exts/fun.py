@@ -16,7 +16,7 @@ class Fun(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if not message.guild.id == self.bot.config['main_guild_id']:
             return
 
@@ -36,7 +36,7 @@ class Fun(commands.Cog):
                     break
 
     @commands.command()
-    async def cat(self, ctx):
+    async def cat(self, ctx: commands.Context):
         """cat"""
         async with aiohttp.ClientSession(loop=self.bot.loop) as session:
             resp = await session.get("https://api.thecatapi.com/v1/images/search")
@@ -56,7 +56,7 @@ class Fun(commands.Cog):
     @commands.command(name='2048')
     @commands.cooldown(1, 30)
     @commands.bot_has_permissions(add_reactions=True, manage_messages=True)
-    async def _2048(self, ctx, size=4):
+    async def _2048(self, ctx: commands.Context, size: int = 4):
         if not 2 <= size <= 8:
             raise commands.BadArgument('size must be between 2 and 8')
 

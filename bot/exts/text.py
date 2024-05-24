@@ -3,8 +3,8 @@ import hashlib
 import io
 import re
 import time
-import typing
 import unicodedata
+from typing import Optional
 
 import PIL
 import discord
@@ -16,11 +16,8 @@ from bot.utils.formatting import codeblock
 
 class Text(commands.Cog):
     """Collection of commands for text manipulation, encoding & decoding, etc"""
-    def __init__(self, bot):
-        self.bot = bot
-
     @commands.command(aliases=['binary', 'bin'])
-    async def binaryencode(self, ctx, *, text: str):
+    async def binaryencode(self, ctx: commands.Context, *, text: str):
         """Encodes given text to binary ascii"""
         encoded = ' '.join(f'{ord(i):0>8b}' for i in text)
         await ctx.send(
@@ -33,7 +30,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['bindec'])
-    async def binarydecode(self, ctx, *, text: str):
+    async def binarydecode(self, ctx: commands.Context, *, text: str):
         """Decodes given binary text"""
         text = [i for i in text if i in '01']
         decoded = [text[i:i+8] for i in range(0, len(text), 8)]
@@ -48,7 +45,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['base64', 'b64'])
-    async def base64encode(self, ctx, *, text: str):
+    async def base64encode(self, ctx: commands.Context, *, text: str):
         """Encodes given text to base64"""
         encoded = base64.b64encode(text.encode()).decode(errors='replace')
         await ctx.send(
@@ -61,7 +58,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['b64dec'])
-    async def base64decode(self, ctx, *, text: str):
+    async def base64decode(self, ctx: commands.Context, *, text: str):
         """Decodes given base64 text"""
         try:
             decoded = base64.b64decode(text.encode(), validate=True).decode(errors='replace')
@@ -79,7 +76,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['uc'])
-    async def unicodeinfo(self, ctx, *, char):
+    async def unicodeinfo(self, ctx: commands.Context, *, char: str):
         """Gives info about a unicode character
 
         Char can be a single character, an hex number, or the *full* character name"""
@@ -111,7 +108,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['hash'])
-    async def hashtext(self, ctx, algo: typing.Optional[str], *, text: typing.Optional[str]):
+    async def hashtext(self, ctx: commands.Context, algo: Optional[str], *, text: Optional[str]):
         """Hashes given text with chosen algo
 
         Run this command to list available algorithms"""
@@ -148,7 +145,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['mono'])
-    async def fullwidth(self, ctx, *, text: str):
+    async def fullwidth(self, ctx: commands.Context, *, text: str):
         """ｗｉｄｅ"""
         # Translate ascii -> fullwidth by adding 0xfee0, but use U+3000 for spaces
         translation_table = dict(zip(range(0x21, 0x7e), range(0xff01, 0xff5e)))
@@ -163,7 +160,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['re'])
-    async def regex(self, ctx, pattern, *, text):
+    async def regex(self, ctx: commands.Context, pattern: str, *, text: str):
         """Match regex pattern against text"""
         init_time = time.perf_counter()
         if text is None:
@@ -206,7 +203,7 @@ class Text(commands.Cog):
             )
 
     @commands.command(aliases=['sre'])
-    async def sregex(self, ctx, pattern, replacement, *, text: typing.Optional[str]):
+    async def sregex(self, ctx: commands.Context, pattern: str, replacement: str, *, text: str):
         """Regex replacement"""
         init_time = time.perf_counter()
         if text is None:
@@ -240,7 +237,7 @@ class Text(commands.Cog):
         )
 
     @commands.command(aliases=['asciiart'])
-    async def textimg(self, ctx, width: typing.Optional[int] = 48):
+    async def textimg(self, ctx: commands.Context, width: Optional[int] = 48):
         """Converts an image to text
 
         · Image must be an attachment and under 10 mb
