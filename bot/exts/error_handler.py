@@ -129,8 +129,7 @@ class ErrorHandler(commands.Cog):
             if self.error_log_channel:
                 await self.bot.get_channel(self.error_log_channel).send(
                     f"{hashlib.md5(ctx.author.id.to_bytes(10,'big')).hexdigest()}:"
-                    f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()} "
-                    f"<@{self.bot.owner_id}>",
+                    f"{hashlib.md5(ctx.message.id.to_bytes(10,'big')).hexdigest()}",
                     file=discord.File(io.StringIO(json.dumps(dump_obj, indent=4)), 'dump.json')
                 )
 
