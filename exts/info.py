@@ -10,7 +10,7 @@ from discord.ext import commands
 
 class Info(commands.Cog):
     @commands.command()
-    async def time(self, ctx, *, timezone: str):
+    async def time(self, ctx: commands.Context, *, timezone: str):
         """Gets current time in given timezone"""
         if re.fullmatch(r'(UTC|GMT)?[+-]?\d\d?:?(\d\d)?', timezone):
             if re.search(r'\d:?\d\d', timezone):
@@ -20,10 +20,10 @@ class Info(commands.Cog):
                 )
 
             else:
-                offset = datetime.timedelta(hours=int(re.findall(r'\d+', timezone)[0]))
+                offset = datetime.timedelta(hours=int(re.findall(r'-?\d+', timezone)[0]))
 
-            if offset.days >= 1:
-                raise commands.BadArgument('Invalid offset (>= 24 hrs)')
+            if abs(offset.days) >= 1:
+                raise commands.BadArgument('Invalid offset (≥ 24 hrs)')
 
             dt = datetime.datetime.now(datetime.timezone(offset))
             offset_formmated = re.sub(r"(-?\d\d?):?(\d\d)$", r"\1:\2", timezone)
@@ -65,7 +65,7 @@ class Info(commands.Cog):
                     + str(dt.dst()).removesuffix(':00')
 
             zone_offset = ('+' if abs(dt.utcoffset()) == dt.utcoffset() else '-') \
-                + str(abs(dt.utcoffset())).removesuffix(':00')
+                        + str(abs(dt.utcoffset())).removesuffix(':00')
 
             await ctx.send(
                 embed=discord.Embed(
@@ -82,5 +82,5 @@ class Info(commands.Cog):
             )
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Info())
