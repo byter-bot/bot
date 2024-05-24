@@ -25,7 +25,7 @@ class Utils(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def embedraw(self, ctx, *, data: str):
         try:
-            if not data.startswith('{') and not data.endswith('}'):
+            if not data.startswith('{'):
                 data = '{' + data + '}'
 
             embed = discord.Embed.from_dict(json.loads(data))
