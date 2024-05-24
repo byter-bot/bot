@@ -16,6 +16,7 @@ codeblock_wrapper = textwrap.TextWrapper(
     drop_whitespace=False
 )
 
+
 def format_codeblock(text: str):
     text = str(text)
     if text == '':
@@ -28,6 +29,7 @@ def format_codeblock(text: str):
     formatted = formatted + '\n```'
 
     return formatted
+
 
 def get_files(*contents):
     files = []
@@ -66,13 +68,13 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
             with contextlib.redirect_stdout(code_stdout):
                 code_return = await env['func']()
 
-        except Exception as exc:
+        except:  # noqa: E722
             return_formatted = format_codeblock(code_return)
             stdout_formatted = format_codeblock(code_stdout.getvalue())
             traceback_formatted = format_codeblock(traceback.format_exc(-1))
             embed = discord.Embed(
                 color=0xfa5050,
-                title=f":x: error!",
+                title=":x: error!",
                 description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
 
@@ -118,12 +120,9 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
                     else command.strip('` ')
 
         exec_time = time.perf_counter()
-        proc = await asyncio.subprocess \
-                .create_subprocess_shell(
-                    command,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE
-                )
+        proc = await asyncio.subprocess.create_subprocess_shell(
+            command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
 
         stdout, stderr = await proc.communicate()
         stdout_formatted = format_codeblock(stdout.decode())
@@ -142,7 +141,7 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
                 description=f"{(time.perf_counter()-exec_time)*1000:g}ms :clock2:"
             )
 
-        if stdout_formatted == stderr_formatted == None:
+        if stdout_formatted is None and stderr_formatted is None:
             embed.description = 'no output · ' + embed.description
 
         if stdout_formatted is not None:
@@ -150,7 +149,6 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
 
         if stderr_formatted is not None:
             embed.add_field(name='Stderr:', value=stderr_formatted, inline=False)
-
 
         await ctx.send(embed=embed, files=get_files(stdout.decode(), stderr.decode()))
 
@@ -162,4 +160,3 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
 
 def setup(bot):
     bot.add_cog(Admin(bot))
-
