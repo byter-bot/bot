@@ -1,4 +1,5 @@
 import asyncio
+import re
 import secrets
 
 import aiohttp
@@ -19,14 +20,15 @@ class Fun(commands.Cog):
         if not message.guild.id == self.bot.config['main_guild_id']:
             return
 
-        filtered_msg = ''.join(
-            char for char in message.content.lower() if 'a' <= char <= 'z' or char == ' '
-        )
-
         for reaction, triggers in self.bot.config['reactions'].items():
             for trigger in triggers:
-                if trigger in filtered_msg.split(' '):
-                    if reaction.isdecimal:
+                match = re.search(
+                    r'(\s|^){}+(\s|$)'.format(trigger),
+                    re.sub(r'[^a-z\s]', '', message.content.lower())
+                )
+
+                if match:
+                    if reaction.isdecimal():
                         reaction = self.bot.get_emoji(int(reaction))
 
                     await message.add_reaction(reaction)
