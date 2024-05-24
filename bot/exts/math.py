@@ -40,6 +40,18 @@ OPERATORS = {
     ast.Not: operator.not_,
     ast.UAdd: operator.pos,
     ast.USub: operator.neg,
+
+    # ast.Compare
+    ast.Eq: operator.eq,
+    ast.NotEq: operator.ne,
+    ast.Lt: operator.lt,
+    ast.LtE: operator.le,
+    ast.Gt: operator.gt,
+    ast.GtE: operator.ge,
+    ast.Is: operator.is_,
+    ast.IsNot: operator.is_not,
+    ast.In: lambda a, b: a in b,
+    ast.NotIn: lambda a, b: a not in b
 }
 
 
@@ -322,6 +334,16 @@ class SafeEvaluator(ast.NodeVisitor):
 
     def visit_UnaryOp(self, node: ast.UnaryOp) -> Any:
         return OPERATORS[type(node.op)](self.visit(node.operand))
+
+    def visit_Compare(self, node: ast.Compare) -> Boolean:
+        left = self.visit(node.left)
+        for op, comp in zip(node.ops, node.comparators):
+            right = self.visit(comp)
+            if not OPERATORS[type(op)](left, right):
+                return Boolean(False)
+            left = right
+
+        return Boolean(True)
 
     def visit_Name(self, node: ast.Name) -> Any:
         context = type(node.ctx)
