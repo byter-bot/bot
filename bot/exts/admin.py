@@ -6,7 +6,6 @@ import pprint
 import textwrap
 import time
 import traceback
-from typing import List
 
 import discord
 from discord.ext import commands
@@ -158,7 +157,7 @@ class Admin(commands.Cog, command_attrs={"hidden": True}):
         await ctx.message.add_reaction('\N{white heavy check mark}')
 
     @commands.command(aliases=['l'])
-    async def loadexts(self, ctx: commands.Context, *exts: List[str]):
+    async def loadexts(self, ctx: commands.Context, *exts):
         if len(exts) == 0:
             await ctx.send(', '.join(f'`{i}`' for i in self.bot.extensions.keys()))
             return
