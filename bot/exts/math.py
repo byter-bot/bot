@@ -152,14 +152,7 @@ class EvalFunction:
         return self
 
     def __call__(self, *args, **kwargs) -> Any:
-        res = self.func(*args, **kwargs)
-        if isinstance(res, (Number, Boolean)):
-            return res
-        if isinstance(res, bool):
-            return Boolean(res)
-        if isinstance(res, numbers.Number):
-            return Number(str(res))
-        return res
+        return self.func(*args, **kwargs)
 
     def __repr__(self):
         return f'<built-in function {self.func.__name__}>'
@@ -307,6 +300,16 @@ class SafeEvaluator(ast.NodeVisitor):
         self.expression = expression
         self.nodes = ast.parse(expression).body
         self.env = {}
+
+    def visit(self, node: ast.AST) -> Any:
+        res = super().visit(node)
+        if isinstance(res, (Number, Boolean)):
+            return res
+        if isinstance(res, bool):
+            return Boolean(res)
+        if isinstance(res, numbers.Number):
+            return Number(res)
+        return res
 
     def evaluate(self):
         for node in self.nodes:
