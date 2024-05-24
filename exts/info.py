@@ -60,8 +60,12 @@ class Info(commands.Cog):
             dt = datetime.datetime.now(zone)
             dst = ''
             if dt.dst():
-                dst = '**Daylight saving time offset:** ' + \
-                    ('+' if abs(dt.dst()) == dt.dst() else '-') + str(dt.dst())
+                dst = '**Daylight saving time offset:** ' \
+                    + ('+' if abs(dt.dst()) == dt.dst() else '-') \
+                    + str(dt.dst()).removesuffix(':00')
+
+            zone_offset = ('+' if abs(dt.utcoffset()) == dt.utcoffset() else '-') \
+                + str(abs(dt.utcoffset())).removesuffix(':00')
 
             await ctx.send(
                 embed=discord.Embed(
@@ -69,7 +73,7 @@ class Info(commands.Cog):
                     title=f'It is currently {dt.strftime("%H:%M")} there',
                     description=(
                         f'**Zone:** {zone.key.replace("_", " ")} ({dt.tzname()})\n'
-                        f'**Offset:** {dt.utcoffset()}{abs(dt.utcoffset())}\n'
+                        f'**Offset:** {zone_offset}\n'
                         f'**Time:** {dt.strftime("%H:%M:%S")}\n'
                         f'**Date:** {dt.strftime("%A, %B %d, %Y")}\n'
                         f'**ISO timestamp:** {dt.isoformat()}\n'
