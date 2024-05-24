@@ -7,7 +7,6 @@ import time
 import typing
 import unicodedata
 
-import aiohttp
 import discord
 import PIL
 from discord.ext import commands
@@ -19,6 +18,7 @@ codeblock_wrapper = textwrap.TextWrapper(
     break_on_hyphens=False, replace_whitespace=False,
     drop_whitespace=False
 )
+
 
 def codeblock_and_trunc(text: str):
     """Utility function to return codeblock + file if it exceeds 600 chars"""
@@ -145,7 +145,7 @@ class Text(commands.Cog):
             await ctx.send(
                 embed=discord.Embed(
                     color=0x5050fa,
-                    title=f'Available hash algorithms:',
+                    title='Available hash algorithms:',
                     description=', '.join(
                         f'`{i}`' for i in hashlib.algorithms_available
                         if not i.startswith('shake')
@@ -277,7 +277,7 @@ class Text(commands.Cog):
         if not ctx.message.attachments:
             raise commands.BadArgument('missing attachment')
 
-        if ctx.message.attachments[0].size > 1e7: # 10 mb
+        if ctx.message.attachments[0].size > 1e7:  # 10 mb
             raise commands.BadArgument('file too large')
 
         init_time = time.perf_counter()
@@ -287,7 +287,6 @@ class Text(commands.Cog):
 
         except PIL.UnidentifiedImageError:
             raise commands.BadArgument('invalid image')
-
 
         if image.size[1]/(image.size[0]/width)//1.8 >= 320:
             raise commands.UserInputError('file height is too high!')
@@ -345,7 +344,6 @@ class Text(commands.Cog):
                 )
 
             await ctx.message.add_reaction('\N{white heavy check mark}')
-
 
 
 def setup(bot):

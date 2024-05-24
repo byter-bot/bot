@@ -145,9 +145,10 @@ class Utils(commands.Cog):
                 color=0x5050fa,
                 title=title.strip(),
                 timestamp=ctx.message.created_at,
-                description=
+                description=(
                     description
                     + '<:hand_thumbsup:757023230073634922> / <:hand_thumbsdown:757019524058054686>'
+                )
             )
 
             embed.set_author(name=f'Poll by {ctx.author}', icon_url=ctx.author.avatar_url)
@@ -184,9 +185,7 @@ class Utils(commands.Cog):
             color=0x5050fa,
             title=title.strip(),
             timestamp=ctx.message.created_at,
-            description=
-                description
-                + '\n'.join(f'{emote}: {text}' for emote, text in poll)
+            description=description + '\n'.join(f'{emote}: {text}' for emote, text in poll)
         )
 
         embed.set_author(name=f'Poll by {ctx.author}', icon_url=ctx.author.avatar_url)
@@ -199,7 +198,6 @@ class Utils(commands.Cog):
 
             except discord.NotFound:
                 pass
-
 
 
 def setup(bot):

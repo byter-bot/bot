@@ -1,7 +1,6 @@
 import json
 import pkgutil
 import traceback
-from pathlib import Path
 
 import discord
 from discord.ext import commands
@@ -10,6 +9,7 @@ from bot import exts
 
 
 CFG = json.load(open('config_defaults.json')) | json.load(open('config.json'))
+
 
 class ByterBot(commands.Bot):
     def __init__(self):
@@ -23,11 +23,19 @@ class ByterBot(commands.Bot):
         )
 
         self.config = CFG
+
         def _imp_err(name):
             raise ImportError(name=name)
 
         for module in pkgutil.walk_packages(exts.__path__, exts.__name__ + '.', onerror=_imp_err):
-            self.load_extension(module.name)
+            try:
+                self.load_extension(module.name)
+
+            except commands.NoEntryPointError:
+                pass
+
+            except commands.ExtensionError:
+                traceback.print_exc()
 
 
 bot = ByterBot()
